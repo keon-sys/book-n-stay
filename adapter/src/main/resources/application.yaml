@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: book-n-stay
+  profiles:
+    include:
+    active: dev
+
+server:
+  port: 8080
+  threads:
+    virtual:
+      enable: true
+  shutdown: graceful
