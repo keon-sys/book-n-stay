@@ -166,3 +166,6 @@ gradle-app.setting
 ### Gradle Patch ###
 # Java heap dump
 *.hprof
+
+### Custom ###
+AGENTS.md

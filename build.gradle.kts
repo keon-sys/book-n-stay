@@ -1,8 +1,8 @@
 plugins {
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
-	id("org.springframework.boot") version "3.5.6"
-	id("io.spring.dependency-management") version "1.1.7"
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
+    id("org.springframework.boot") version "3.5.6"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 tasks.bootJar {
@@ -20,7 +20,7 @@ subprojects {
     version = "0.0.1-SNAPSHOT"
     description = "Book and Stay"
 
-    extra["springCloudVersion"] = "2024.0.0"
+    extra["springCloudVersion"] = "2025.0.0"
 
     apply {
         plugin("kotlin")
@@ -30,13 +30,21 @@ subprojects {
     }
 
     dependencies {
+        implementation("org.jetbrains.kotlin:kotlin-reflect")
+        implementation("org.springframework.boot:spring-boot-starter")
+
+        // jackson
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         implementation("com.fasterxml.jackson.core:jackson-databind")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-        implementation("org.jetbrains.kotlin:kotlin-reflect")
-        implementation("org.springframework.boot:spring-boot-starter")
+
+        // cache
         implementation("org.springframework.boot:spring-boot-starter-cache")
+
+        // logger
         runtimeOnly("io.github.oshai:kotlin-logging-jvm:7.0.13")
+
+        // test
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
         testImplementation(kotlin("test"))
