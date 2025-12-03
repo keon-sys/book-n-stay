@@ -15,11 +15,11 @@ spec:
     spec:
       containers:
         - name: app
-          image: book-n-stay:dev
+          image: book-n-stay:prod
           imagePullPolicy: IfNotPresent
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: "dev"
+              value: "prod"
           ports:
             - name: http
               containerPort: 8080
