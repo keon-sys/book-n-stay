@@ -9,7 +9,7 @@ COPY adapter/build.gradle.kts adapter/
 COPY application/build.gradle.kts application/
 COPY domain/build.gradle.kts domain/
 RUN chmod +x gradlew
-RUN ./gradlew --no-daemon build || return 0
+RUN ./gradlew --no-daemon build || true
 
 COPY adapter/src adapter/src
 COPY application/src application/src

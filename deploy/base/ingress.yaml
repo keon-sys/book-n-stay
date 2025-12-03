@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: book-n-stay
+  namespace: book-n-stay
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - book-n-stay.example.com
+      secretName: book-n-stay-tls
+  rules:
+    - host: book-n-stay.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: book-n-stay
+                port:
+                  number: 80
