@@ -1,4 +1,134 @@
 package org.keon.book.adapter.filter
 
-class KakaoAccountIdFilter {
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.keon.book.adapter.auth.JwtAuthTokenService
+import org.keon.book.application.port.inbound.AuthUseCase
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
+import org.springframework.web.filter.OncePerRequestFilter
+import java.net.URLEncoder
+import java.util.Collections
+import jakarta.servlet.http.HttpServletRequestWrapper
+import org.keon.book.adapter.config.Properties
+import org.keon.book.adapter.exception.KakaoAuthenticationException
+import java.util.Locale
+
+@Component
+class KakaoAccountIdFilter(
+    private val authUseCase: AuthUseCase,
+    private val tokenService: JwtAuthTokenService,
+    private val authTokenProperty: Properties.AuthTokenProperty,
+) : OncePerRequestFilter() {
+
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        val path = request.requestURI
+        if (path.startsWith("/kakao/auth") ||
+            path.startsWith("/api/auth")
+        ) return true
+        return protectedPaths.none { path.startsWith(it) }
+    }
+
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain,
+    ) {
+        try {
+            val cookie = cookieToken(request)
+            if (cookie != null) {
+                val accountId = handleCookieToken(cookie)
+                filterChain.doFilter(KakaoAccountHeaderRequestWrapper(request, accountId), response)
+            } else {
+                val accessToken = bearerToken(request)
+                    ?: return handleMissingAuth(request, response)
+                val accountId = handleAccessToken(accessToken)
+                filterChain.doFilter(KakaoAccountHeaderRequestWrapper(request, accountId), response)
+            }
+        } catch (ex: KakaoAuthenticationException) {
+            unauthorized(response, ex.message ?: "Unauthorized")
+        }
+    }
+
+    private fun handleCookieToken(token: String): String {
+        val accountId = tokenService.parseAccountId(token)
+        return accountId
+    }
+
+    private fun handleAccessToken(accessToken: String): String {
+        val session = authUseCase.createSession(accessToken)
+        return session.user.id
+    }
+
+    private fun cookieToken(request: HttpServletRequest): String? =
+        request.cookies
+            ?.firstOrNull { it.name == authTokenProperty.cookieName }
+            ?.value
+
+    private fun bearerToken(request: HttpServletRequest): String? {
+        val header = request.getHeader(HttpHeaders.AUTHORIZATION) ?: return null
+        if (!header.startsWith("Bearer ", ignoreCase = true)) return null
+        return header.removePrefix("Bearer").trim()
+    }
+
+    private fun unauthorized(response: HttpServletResponse, message: String) {
+        response.status = HttpServletResponse.SC_UNAUTHORIZED
+        response.contentType = MediaType.TEXT_PLAIN_VALUE
+        response.writer.write(message)
+    }
+
+    private fun handleMissingAuth(request: HttpServletRequest, response: HttpServletResponse) {
+        val path = request.requestURI
+        // HTML 페이지 접근은 로그인 페이지로 리다이렉트, API는 401
+        if (path.startsWith("/booking/")) {
+            val target = buildTarget(request)
+            val location = "/kakao/auth?redirect=${URLEncoder.encode(target, Charsets.UTF_8)}"
+            response.sendRedirect(location)
+        } else {
+            unauthorized(response, "Unauthorized")
+        }
+    }
+
+    private fun buildTarget(request: HttpServletRequest): String {
+        val query = request.queryString?.let { "?$it" } ?: ""
+        return "${request.requestURI}$query"
+    }
+
+    private class KakaoAccountHeaderRequestWrapper(
+        request: HttpServletRequest,
+        private val accountId: String,
+    ) : HttpServletRequestWrapper(request) {
+
+        private val headerName = ACCOUNT_HEADER.lowercase(Locale.getDefault())
+
+        override fun getHeader(name: String?): String? {
+            name ?: return null
+            return if (name.lowercase(Locale.getDefault()) == headerName) accountId else super.getHeader(name)
+        }
+
+        override fun getHeaders(name: String?): java.util.Enumeration<String> {
+            name ?: return Collections.emptyEnumeration()
+            return if (name.lowercase(Locale.getDefault()) == headerName) {
+                Collections.enumeration(listOf(accountId))
+            } else {
+                super.getHeaders(name)
+            }
+        }
+
+        override fun getHeaderNames(): java.util.Enumeration<String> {
+            val names = mutableSetOf<String>()
+            Collections.list(super.getHeaderNames())
+                .filter { it.lowercase(Locale.getDefault()) != headerName }
+                .forEach { names.add(it) }
+            names.add(ACCOUNT_HEADER)
+            return Collections.enumeration(names)
+        }
+    }
+
+    companion object {
+        private const val ACCOUNT_HEADER = "X-Kakao-Account-Id"
+        private val protectedPaths = listOf("/api/bookings", "/api/booking", "/booking/calendar")
+    }
 }

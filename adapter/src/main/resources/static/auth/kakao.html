@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>Kakao Login</title>
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <script>
+        let kakaoConfigured = false;
+        let returnTo = null;
+
+        function initKakao() {
+            fetch('/api/auth/kakao/config')
+                .then(function (res) { return res.json(); })
+                .then(function (config) {
+                    if (!config.javascriptKey) {
+                        throw new Error('Kakao JavaScript 키가 설정되지 않았습니다.');
+                    }
+                    Kakao.init(config.javascriptKey);
+                    kakaoConfigured = true;
+                    document.getElementById('redirect').textContent = config.redirectUri;
+                })
+                .catch(function (err) {
+                    document.getElementById('server-response').textContent = err;
+                });
+        }
+
+        function loginWithKakao() {
+            if (!kakaoConfigured) {
+                alert('Kakao SDK 초기화 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+            Kakao.Auth.login({
+                scope: 'profile_nickname account_email',
+                success: function(authObj) {
+                    document.getElementById('token').textContent = authObj.access_token;
+                    fetch('/api/auth/kakao/session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ accessToken: authObj.access_token })
+                    }).then(function(res) {
+                        return res.json();
+                    }).then(function(body) {
+                        document.getElementById('server-response').textContent = JSON.stringify(body, null, 2);
+                        if (returnTo) {
+                            window.location.href = returnTo;
+                        }
+                    }).catch(function(err) {
+                        document.getElementById('server-response').textContent = err;
+                    });
+                },
+                fail: function(err) {
+                    alert(JSON.stringify(err));
+                }
+            });
+        }
+
+        function redirectLogin() {
+            if (!kakaoConfigured) {
+                alert('Kakao SDK 초기화 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+            fetch('/api/auth/kakao/config')
+                .then(res => res.json())
+                .then(config => {
+                    Kakao.Auth.authorize({
+                        redirectUri: config.redirectUri,
+                        scope: 'profile_nickname account_email',
+                        state: returnTo ? encodeURIComponent(returnTo) : undefined
+                    });
+                })
+                .catch(err => alert(err));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            returnTo = params.get('redirect');
+            initKakao();
+        });
+    </script>
+    <style>
+        body { font-family: "Noto Sans KR", sans-serif; margin: 40px; color: #1b1b1b; }
+        button { padding: 12px 20px; font-size: 16px; cursor: pointer; background: #fee500; border: none; border-radius: 8px; }
+        pre { background: #f7f7f7; padding: 16px; border-radius: 6px; }
+        code { color: #c7254e; }
+    </style>
+</head>
+<body>
+<h1>Kakao Login</h1>
+<p>JavaScript SDK로 로그인 후 REST API(`/v2/user/me`)를 백엔드에서 호출합니다.</p>
+<p>Redirect URI: <code id="redirect"></code></p>
+<button onclick="loginWithKakao()">카카오 로그인 (Implicit)</button>
+<button onclick="redirectLogin()" style="margin-left:8px;">카카오 로그인 (Redirect)</button>
+<h2>Access Token</h2>
+<pre id="token">로그인 후 토큰이 표시됩니다.</pre>
+<h2>Server Response</h2>
+<pre id="server-response">/api/auth/kakao/session 응답이 표시됩니다.</pre>
+</body>
+</html>

@@ -2,12 +2,33 @@ spring:
   application:
     name: book-n-stay
   profiles:
-    include:
+    include: db, security
     active: dev
+  threads:
+    virtual:
+      enabled: true
 
 server:
   port: 8080
-  threads:
-    virtual:
-      enable: true
   shutdown: graceful
+
+---
+spring.config.active.on-profile: dev
+app:
+  phase: DEV
+
+logging:
+  level:
+    root: INFO
+    org.keon.book: DEBUG
+
+---
+spring.config.active.on-profile: prod
+app:
+  phase: PROD
+
+logging:
+  level:
+    root: WARN
+    org.keon.book: INFO
+

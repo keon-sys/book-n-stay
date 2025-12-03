@@ -1,16 +1,13 @@
 package org.keon.book.application.port.outbound
 
+import org.keon.book.domain.booking.Booking
 import java.time.ZonedDateTime
 
 interface BookingRepository {
 
-    fun fetchBookings()
+    fun findByDate(date: ZonedDateTime): List<Booking>
 
-    data class BookingsRequest(
-        val date: ZonedDateTime,
-    )
+    fun save(booking: Booking)
 
-    data class BookingsResult(
-        val accountIds: List<String>,
-    )
+    fun delete(booking: Booking)
 }

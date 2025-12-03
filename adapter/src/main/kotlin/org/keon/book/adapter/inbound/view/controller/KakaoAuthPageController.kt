@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ResponseBody
 
 @Controller
-class BookingPageController {
+class KakaoAuthPageController {
 
-    @GetMapping("/booking/calendar", produces = [MediaType.TEXT_HTML_VALUE])
+    @GetMapping("/kakao/auth", produces = [MediaType.TEXT_HTML_VALUE])
     @ResponseBody
-    fun showCalendarPage(): Resource = ClassPathResource("static/booking/calendar.html")
+    fun showAuthPage(): Resource = ClassPathResource("static/auth/kakao.html")
 }

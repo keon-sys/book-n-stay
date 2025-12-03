@@ -1,0 +1,17 @@
+security:
+  kakao:
+    javascript-key: ${KAKAO_JAVASCRIPT_KEY:}
+    rest-api-key: ${KAKAO_REST_API_KEY:}
+    client-secret: ${KAKAO_CLIENT_SECRET:}
+    redirect-uri: ${KAKAO_REDIRECT_URI:}
+  kakao-account-id:
+    kakao-base-url: https://kapi.kakao.com
+    kakao-auth-base-url: https://kauth.kakao.com
+  auth:
+    token-secret: ${AUTH_TOKEN_SECRET:}
+    issuer: book-n-stay
+    token-validity: PT30M
+    cookie-name: AUTH
+    cookie-path: /
+    cookie-same-site: Lax
+    cookie-secure: false
