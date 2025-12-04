@@ -20,15 +20,15 @@ import org.springframework.web.bind.annotation.RestController
 class KakaoAuthController(
     private val authUseCase: AuthUseCase,
     private val tokenService: JwtAuthTokenService,
-    private val authTokenProperty: Properties.AuthTokenProperty,
-    private val kakaoProperty: Properties.KakaoProperty,
+    private val securityAuthProperty: Properties.SecurityAuthProperty,
+    private val securityKakaoProperty: Properties.SecurityKakaoProperty,
 ) {
 
     @GetMapping("/api/v1/auth/kakao/config", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun config(): KakaoConfigResponse =
         KakaoConfigResponse(
-            javascriptKey = kakaoProperty.javascriptKey,
-            redirectUri = kakaoProperty.redirectUri,
+            javascriptKey = securityKakaoProperty.javascriptKey,
+            redirectUri = securityKakaoProperty.redirectUri,
         )
 
     @PostMapping("/api/v1/auth/kakao/session", consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -44,7 +44,7 @@ class KakaoAuthController(
 
     @PostMapping("/api/v1/auth/kakao/token", consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun exchangeCode(@RequestBody request: KakaoCodeRequest) =
-        authUseCase.exchangeAuthorizationCode(request.authorizationCode, kakaoProperty.redirectUri)
+        authUseCase.exchangeAuthorizationCode(request.authorizationCode, securityKakaoProperty.redirectUri)
 
     @GetMapping("/api/v1/auth/kakao/callback")
     fun handleCallback(
@@ -52,7 +52,7 @@ class KakaoAuthController(
         @RequestParam(name = "state", required = false) state: String?,
         response: HttpServletResponse,
     ): ResponseEntity<Void> {
-        val token = authUseCase.exchangeAuthorizationCode(authorizationCode, kakaoProperty.redirectUri)
+        val token = authUseCase.exchangeAuthorizationCode(authorizationCode, securityKakaoProperty.redirectUri)
         val authResult = authUseCase.createSession(token.accessToken)
         val jwt = tokenService.createToken(authResult.user.id)
         response.addHeader("Set-Cookie", buildCookie(jwt).toString())
@@ -67,12 +67,12 @@ class KakaoAuthController(
     }
 
     private fun buildCookie(token: String): ResponseCookie =
-        ResponseCookie.from(authTokenProperty.cookieName, token)
-            .path(authTokenProperty.cookiePath)
+        ResponseCookie.from(securityAuthProperty.cookieName, token)
+            .path(securityAuthProperty.cookiePath)
             .httpOnly(true)
-            .secure(authTokenProperty.cookieSecure)
-            .sameSite(authTokenProperty.cookieSameSite)
-            .maxAge(authTokenProperty.tokenValidity)
+            .secure(securityAuthProperty.cookieSecure)
+            .sameSite(securityAuthProperty.cookieSameSite)
+            .maxAge(securityAuthProperty.tokenValidity)
             .build()
 
     @PostMapping("/api/v1/auth/kakao/logout")
@@ -82,11 +82,11 @@ class KakaoAuthController(
     }
 
     private fun deleteCookie(): ResponseCookie =
-        ResponseCookie.from(authTokenProperty.cookieName, "")
-            .path(authTokenProperty.cookiePath)
+        ResponseCookie.from(securityAuthProperty.cookieName, "")
+            .path(securityAuthProperty.cookiePath)
             .httpOnly(true)
-            .secure(authTokenProperty.cookieSecure)
-            .sameSite(authTokenProperty.cookieSameSite)
+            .secure(securityAuthProperty.cookieSecure)
+            .sameSite(securityAuthProperty.cookieSameSite)
             .maxAge(0)
             .build()
 

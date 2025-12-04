@@ -7,6 +7,8 @@ import org.keon.book.application.port.outbound.KakaoUserRepository
 import org.keon.book.application.port.outbound.dto.KakaoAccessToken
 import org.keon.book.application.port.outbound.dto.KakaoUser
 import org.keon.book.adapter.config.Properties
+import org.keon.book.adapter.cache.CacheNames
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
@@ -17,9 +19,9 @@ import org.springframework.web.client.RestClientException
 
 @Component
 class KakaoUserClient(
-    private val builder: RestClient.Builder,
-    private val kakaoProperty: Properties.KakaoProperty,
-    private val kakaoAccountIdProperty: Properties.KakaoAccountIdProperty,
+    builder: RestClient.Builder,
+    kakaoAccountIdProperty: Properties.KakaoAccountIdProperty,
+    private val securityKakaoProperty: Properties.SecurityKakaoProperty,
 ) : KakaoUserRepository {
 
     private val userClient = builder
@@ -32,6 +34,7 @@ class KakaoUserClient(
         .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded;charset=utf-8")
         .build()
 
+    @Cacheable(cacheNames = [CacheNames.KAKAO_USER_BY_ACCESS_TOKEN], key = "#accessToken.accessToken")
     override fun fetchUser(accessToken: KakaoAccessToken): KakaoUser {
         val response = try {
             userClient.get()
@@ -58,16 +61,16 @@ class KakaoUserClient(
     }
 
     override fun exchangeCodeForToken(authorizationCode: String, redirectUri: String): KakaoAccessToken {
-        if (kakaoProperty.restApiKey.isBlank()) {
+        if (securityKakaoProperty.restApiKey.isBlank()) {
             throw KakaoAuthenticationException("Kakao REST API key is not configured.")
         }
 
         val form = LinkedMultiValueMap<String, String>().apply {
             add("grant_type", "authorization_code")
-            add("client_id", kakaoProperty.restApiKey)
+            add("client_id", securityKakaoProperty.restApiKey)
             add("redirect_uri", redirectUri)
             add("code", authorizationCode)
-            kakaoProperty.clientSecret?.takeIf { it.isNotBlank() }?.let { add("client_secret", it) }
+            securityKakaoProperty.clientSecret?.takeIf { it.isNotBlank() }?.let { add("client_secret", it) }
         }
 
         val response = try {

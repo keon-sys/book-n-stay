@@ -20,7 +20,7 @@ import java.util.Locale
 class KakaoAccountIdFilter(
     private val authUseCase: AuthUseCase,
     private val tokenService: JwtAuthTokenService,
-    private val authTokenProperty: Properties.AuthTokenProperty,
+    private val securityAuthProperty: Properties.SecurityAuthProperty,
 ) : OncePerRequestFilter() {
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
@@ -62,7 +62,7 @@ class KakaoAccountIdFilter(
 
     private fun cookieToken(request: HttpServletRequest): String? =
         request.cookies
-            ?.firstOrNull { it.name == authTokenProperty.cookieName }
+            ?.firstOrNull { it.name == securityAuthProperty.cookieName }
             ?.value
 
     private fun bearerToken(request: HttpServletRequest): String? {

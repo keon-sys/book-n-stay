@@ -9,8 +9,8 @@ import java.time.Duration
 @ConfigurationPropertiesScan
 data class Properties(
     val appProperty: AppProperty,
-    val authTokenProperty: AuthTokenProperty,
-    val kakaoProperty: KakaoProperty,
+    val securityAuthProperty: SecurityAuthProperty,
+    val securityKakaoProperty: SecurityKakaoProperty,
     val kakaoAccountIdProperty: KakaoAccountIdProperty,
     val cacheProperty: CacheProperty,
 ) {
@@ -28,7 +28,7 @@ data class Properties(
     }
 
     @ConfigurationProperties(prefix = "security.auth")
-    data class AuthTokenProperty(
+    data class SecurityAuthProperty(
         val tokenSecret: String,
         val issuer: String,
         val tokenValidity: Duration,
@@ -39,7 +39,7 @@ data class Properties(
     )
 
     @ConfigurationProperties(prefix = "security.kakao")
-    data class KakaoProperty(
+    data class SecurityKakaoProperty(
         val javascriptKey: String,
         val redirectUri: String,
         val restApiKey: String,
