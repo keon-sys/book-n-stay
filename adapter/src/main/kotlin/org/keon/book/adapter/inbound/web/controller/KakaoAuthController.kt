@@ -24,14 +24,14 @@ class KakaoAuthController(
     private val kakaoProperty: Properties.KakaoProperty,
 ) {
 
-    @GetMapping("/api/auth/kakao/config", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/api/v1/auth/kakao/config", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun config(): KakaoConfigResponse =
         KakaoConfigResponse(
             javascriptKey = kakaoProperty.javascriptKey,
             redirectUri = kakaoProperty.redirectUri,
         )
 
-    @PostMapping("/api/auth/kakao/session", consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/api/v1/auth/kakao/session", consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun createSession(
         @RequestBody request: KakaoSessionRequest,
         response: HttpServletResponse,
@@ -42,11 +42,11 @@ class KakaoAuthController(
         return authResult
     }
 
-    @PostMapping("/api/auth/kakao/token", consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/api/v1/auth/kakao/token", consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun exchangeCode(@RequestBody request: KakaoCodeRequest) =
         authUseCase.exchangeAuthorizationCode(request.authorizationCode, kakaoProperty.redirectUri)
 
-    @GetMapping("/api/kakao/auth/callback")
+    @GetMapping("/api/v1/auth/kakao/callback")
     fun handleCallback(
         @RequestParam("code") authorizationCode: String,
         @RequestParam(name = "state", required = false) state: String?,
