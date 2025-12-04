@@ -1,6 +1,8 @@
 spring:
   application:
     name: book-n-stay
+  config:
+    import: optional:classpath:/custom/
   profiles:
     include: db, security
     active: dev
@@ -31,4 +33,3 @@ logging:
   level:
     root: WARN
     org.keon.book: INFO
-

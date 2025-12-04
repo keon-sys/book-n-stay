@@ -169,3 +169,4 @@ gradle-app.setting
 
 ### Custom ###
 AGENTS.md
+adapter/src/main/resources/custom/
