@@ -25,10 +25,8 @@ class KakaoAccountIdFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.requestURI
-        if (path.startsWith("/kakao/auth") ||
-            path.startsWith("/api/auth")
-        ) return true
-        return protectedPaths.none { path.startsWith(it) }
+        return path.startsWith("/auth/") ||
+            path.startsWith("/api/v1/auth/")
     }
 
     override fun doFilterInternal(
@@ -84,7 +82,7 @@ class KakaoAccountIdFilter(
         // HTML 페이지 접근은 로그인 페이지로 리다이렉트, API는 401
         if (path.startsWith("/booking/")) {
             val target = buildTarget(request)
-            val location = "/kakao/auth?redirect=${URLEncoder.encode(target, Charsets.UTF_8)}"
+            val location = "/v1/auth/kakao?redirect=${URLEncoder.encode(target, Charsets.UTF_8)}"
             response.sendRedirect(location)
         } else {
             unauthorized(response, "Unauthorized")
@@ -129,6 +127,5 @@ class KakaoAccountIdFilter(
 
     companion object {
         private const val ACCOUNT_HEADER = "X-Kakao-Account-Id"
-        private val protectedPaths = listOf("/api/bookings", "/api/booking", "/booking/calendar")
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 class BookingPageController {
 
-    @GetMapping("/booking/calendar", produces = [MediaType.TEXT_HTML_VALUE])
+    @GetMapping("/calendar", produces = [MediaType.TEXT_HTML_VALUE])
     @ResponseBody
     fun showCalendarPage(): Resource = ClassPathResource("static/booking/calendar.html")
 }
