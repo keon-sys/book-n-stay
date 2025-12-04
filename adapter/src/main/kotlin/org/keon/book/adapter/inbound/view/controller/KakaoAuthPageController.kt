@@ -12,5 +12,5 @@ class KakaoAuthPageController {
 
     @GetMapping("/auth/kakao", produces = [MediaType.TEXT_HTML_VALUE])
     @ResponseBody
-    fun showAuthPage(): Resource = ClassPathResource("static/auth/kakao.html")
+    fun showAuthPage(): Resource = ClassPathResource("static/auth/auth.html")
 }

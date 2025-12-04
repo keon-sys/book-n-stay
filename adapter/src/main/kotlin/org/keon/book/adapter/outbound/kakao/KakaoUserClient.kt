@@ -3,7 +3,7 @@ package org.keon.book.adapter.outbound.kakao
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.keon.book.adapter.exception.KakaoAuthenticationException
-import org.keon.book.application.port.outbound.KakaoUserClient
+import org.keon.book.application.port.outbound.KakaoUserRepository
 import org.keon.book.application.port.outbound.dto.KakaoAccessToken
 import org.keon.book.application.port.outbound.dto.KakaoUser
 import org.keon.book.adapter.config.Properties
@@ -16,11 +16,11 @@ import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
 
 @Component
-class KakaoLoginClient(
+class KakaoUserClient(
     private val builder: RestClient.Builder,
     private val kakaoProperty: Properties.KakaoProperty,
     private val kakaoAccountIdProperty: Properties.KakaoAccountIdProperty,
-) : KakaoUserClient {
+) : KakaoUserRepository {
 
     private val userClient = builder
         .baseUrl(kakaoAccountIdProperty.kakaoBaseUrl)
@@ -125,6 +125,8 @@ class KakaoLoginClient(
     )
 
     companion object {
+        const val BEAN_NAME = "kakaoLoginClient"
+
         private const val USER_INFO_PATH = "/v2/user/me"
         private const val TOKEN_PATH = "/oauth/token"
     }

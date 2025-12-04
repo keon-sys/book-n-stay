@@ -9,6 +9,13 @@ spring:
   threads:
     virtual:
       enabled: true
+  cache:
+    type: caffeine
+
+cache:
+  kakao-user:
+    ttl: PT10M
+    maximum-size: 1000
 
 server:
   port: 8080
