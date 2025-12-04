@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 class KakaoAuthPageController {
 
-    @GetMapping("/kakao/auth", produces = [MediaType.TEXT_HTML_VALUE])
+    @GetMapping("/v1/auth/kakao", produces = [MediaType.TEXT_HTML_VALUE])
     @ResponseBody
     fun showAuthPage(): Resource = ClassPathResource("static/auth/kakao.html")
 }
