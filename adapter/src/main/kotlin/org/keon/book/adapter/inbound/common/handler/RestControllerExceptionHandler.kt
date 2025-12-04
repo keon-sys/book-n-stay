@@ -1,10 +1,10 @@
 package org.keon.book.adapter.inbound.common.handler
 
-import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.RestControllerAdvice
 
-@ControllerAdvice(
+@RestControllerAdvice(
     basePackages = [
-        "org.keon.book.adapter.inbound.view"
+        "org.keon.book.adapter.inbound.web"
     ]
 )
 class RestControllerExceptionHandler {

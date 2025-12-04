@@ -46,7 +46,7 @@ class KakaoAccountIdFilter(
                 filterChain.doFilter(KakaoAccountHeaderRequestWrapper(request, accountId), response)
             }
         } catch (ex: KakaoAuthenticationException) {
-            unauthorized(response, ex.message ?: "Unauthorized")
+            unauthorized(request, response, ex.message ?: "Unauthorized")
         }
     }
 
@@ -71,22 +71,30 @@ class KakaoAccountIdFilter(
         return header.removePrefix("Bearer").trim()
     }
 
-    private fun unauthorized(response: HttpServletResponse, message: String) {
-        response.status = HttpServletResponse.SC_UNAUTHORIZED
-        response.contentType = MediaType.TEXT_PLAIN_VALUE
-        response.writer.write(message)
+    private fun unauthorized(request: HttpServletRequest, response: HttpServletResponse, message: String) {
+        val path = request.requestURI
+        if (path.startsWith("/api")) {
+            response.status = HttpServletResponse.SC_UNAUTHORIZED
+            response.contentType = MediaType.APPLICATION_JSON_VALUE
+            response.writer.write("""{"status":401,"error":"Unauthorized","message":"$message","path":"$path"}""")
+        } else {
+            redirectToLogin(request, response)
+        }
     }
 
     private fun handleMissingAuth(request: HttpServletRequest, response: HttpServletResponse) {
         val path = request.requestURI
-        // HTML 페이지 접근은 로그인 페이지로 리다이렉트, API는 401
-        if (path.startsWith("/booking/")) {
-            val target = buildTarget(request)
-            val location = "/v1/auth/kakao?redirect=${URLEncoder.encode(target, Charsets.UTF_8)}"
-            response.sendRedirect(location)
+        if (path.startsWith("/api")) {
+            unauthorized(request, response, "Unauthorized")
         } else {
-            unauthorized(response, "Unauthorized")
+            redirectToLogin(request, response)
         }
+    }
+
+    private fun redirectToLogin(request: HttpServletRequest, response: HttpServletResponse) {
+        val target = buildTarget(request)
+        val location = "/auth/kakao?redirect=${URLEncoder.encode(target, Charsets.UTF_8)}"
+        response.sendRedirect(location)
     }
 
     private fun buildTarget(request: HttpServletRequest): String {

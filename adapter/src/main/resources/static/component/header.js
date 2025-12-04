@@ -33,7 +33,7 @@ function bindLogout() {
                     console.warn('Kakao SDK logout failed', e);
                 }
             }
-            window.location.href = '/v1/auth/kakao?redirect=' + encodeURIComponent(window.location.pathname);
+            window.location.href = '/auth/kakao?redirect=' + encodeURIComponent(window.location.pathname);
         } catch (err) {
             alert('로그아웃에 실패했습니다. 다시 시도해주세요.');
             console.error(err);
