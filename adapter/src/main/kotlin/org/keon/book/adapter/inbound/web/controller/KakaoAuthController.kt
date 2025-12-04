@@ -59,7 +59,7 @@ class KakaoAuthController(
 
         val target = state?.takeIf { it.isNotBlank() }
             ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
-            ?: "/booking/calendar"
+            ?: "/"
 
         return ResponseEntity.status(302)
             .location(URI.create(target))

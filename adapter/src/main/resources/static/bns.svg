@@ -1,0 +1,48 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="book-n-stay icon">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B82F6"></stop>
+      <stop offset="1" stop-color="#22C55E"></stop>
+    </linearGradient>
+  </defs>
+
+  <rect x="56" y="56" width="400" height="400" rx="120" fill="#0F172A"></rect>
+
+  <g transform="translate(156,136)">
+    <!-- main mark -->
+    <path d="M52 0
+             H132
+             C176 0 200 26 200 56
+             C200 76 190 94 172 104
+             C196 114 212 136 212 166
+             C212 206 182 232 136 232
+             H52
+             C24 232 4 212 4 184
+             V48
+             C4 20 24 0 52 0
+             Z" fill="url(#g)"></path>
+
+    <!-- upper counter: narrower + moved left to reduce left-thickness -->
+    <path d="M46 34
+             H122
+             C138 34 148 44 148 58
+             C148 72 138 82 122 82
+             H46
+             Z" fill="#0F172A"></path>
+
+    <!-- bed cutout: moved left + extended downward to reduce bottom-thickness -->
+    <path d="M46 146
+             H148
+             C158 146 166 154 166 164
+             V196
+             H46
+             Z" fill="#0F172A"></path>
+
+    <path d="M46 132
+             H96
+             C104 132 110 138 110 146
+             H46
+             Z" fill="#0F172A"></path>
+  </g>
+</svg>

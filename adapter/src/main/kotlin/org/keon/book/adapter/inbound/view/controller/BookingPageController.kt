@@ -12,5 +12,5 @@ class BookingPageController {
 
     @GetMapping("/calendar", produces = [MediaType.TEXT_HTML_VALUE])
     @ResponseBody
-    fun showCalendarPage(): Resource = ClassPathResource("static/booking/calendar.html")
+    fun showCalendarPage(): Resource = ClassPathResource("static/calendar/calendar.html")
 }
