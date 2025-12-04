@@ -56,7 +56,6 @@ class KakaoUserClient(
         return KakaoUser(
             id = kakaoId.toString(),
             nickname = response.kakaoAccount?.profile?.nickname,
-            email = response.kakaoAccount?.email,
         )
     }
 
