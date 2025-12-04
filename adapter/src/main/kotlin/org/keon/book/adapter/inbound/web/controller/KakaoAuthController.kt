@@ -75,6 +75,21 @@ class KakaoAuthController(
             .maxAge(authTokenProperty.tokenValidity)
             .build()
 
+    @PostMapping("/api/v1/auth/kakao/logout")
+    fun logout(response: HttpServletResponse): ResponseEntity<Void> {
+        response.addHeader("Set-Cookie", deleteCookie().toString())
+        return ResponseEntity.noContent().build()
+    }
+
+    private fun deleteCookie(): ResponseCookie =
+        ResponseCookie.from(authTokenProperty.cookieName, "")
+            .path(authTokenProperty.cookiePath)
+            .httpOnly(true)
+            .secure(authTokenProperty.cookieSecure)
+            .sameSite(authTokenProperty.cookieSameSite)
+            .maxAge(0)
+            .build()
+
     data class KakaoSessionRequest(
         val accessToken: String,
     )

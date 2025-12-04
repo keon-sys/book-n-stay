@@ -13,7 +13,7 @@
             if (kakaoInitPromise) {
                 return kakaoInitPromise;
             }
-            kakaoInitPromise = fetch('/api/auth/kakao/config')
+            kakaoInitPromise = fetch('/api/v1/auth/kakao/config')
                 .then(function (res) {
                     if (!res.ok) {
                         throw new Error('Kakao 설정을 불러오지 못했습니다. (' + res.status + ')');
@@ -70,7 +70,7 @@
                 scope: 'profile_nickname',
                 success: function(authObj) {
                     document.getElementById('token').textContent = authObj.access_token;
-                    fetch('/api/auth/kakao/session', {
+                    fetch('/api/v1/auth/kakao/session', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -97,7 +97,7 @@
             if (!await ensureKakaoReady()) {
                 return;
             }
-            fetch('/api/auth/kakao/config')
+            fetch('/api/v1/auth/kakao/config')
                 .then(res => {
                     if (!res.ok) {
                         throw new Error('Kakao 설정을 불러오지 못했습니다. (' + res.status + ')');
@@ -138,6 +138,6 @@
 <h2>Access Token</h2>
 <pre id="token">로그인 후 토큰이 표시됩니다.</pre>
 <h2>Server Response</h2>
-<pre id="server-response">/api/auth/kakao/session 응답이 표시됩니다.</pre>
+<pre id="server-response">/api/v1/auth/kakao/session 응답이 표시됩니다.</pre>
 </body>
 </html>

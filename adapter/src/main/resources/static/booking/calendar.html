@@ -4,15 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <title>예약 달력</title>
+    <link rel="stylesheet" href="/component/header.css">
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            margin: 40px;
             background: #f6f7fb;
+        }
+        .page {
+            max-width: 860px;
+            margin: 24px auto;
+            padding: 0 24px;
         }
         .calendar {
             max-width: 420px;
-            margin: 0 auto;
+            margin: 24px auto 0;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
@@ -57,42 +62,45 @@
     </style>
 </head>
 <body>
-<div class="calendar">
-    <header>
-        <button>&lt;</button>
-        <h1>2024년 3월</h1>
-        <button>&gt;</button>
-    </header>
-    <table>
-        <thead>
-        <tr>
-            <th>일</th>
-            <th>월</th>
-            <th>화</th>
-            <th>수</th>
-            <th>목</th>
-            <th>금</th>
-            <th>토</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td></td><td></td><td></td><td></td><td class="reserved">1</td><td>2</td><td>3</td>
-        </tr>
-        <tr>
-            <td>4</td><td>5</td><td>6</td><td class="today">7</td><td>8</td><td class="reserved">9</td><td>10</td>
-        </tr>
-        <tr>
-            <td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td>
-        </tr>
-        <tr>
-            <td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td>
-        </tr>
-        <tr>
-            <td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td>
-        </tr>
-        </tbody>
-    </table>
+<div class="page">
+    <div class="calendar">
+        <header>
+            <button>&lt;</button>
+            <h1>2024년 3월</h1>
+            <button>&gt;</button>
+        </header>
+        <table>
+            <thead>
+            <tr>
+                <th>일</th>
+                <th>월</th>
+                <th>화</th>
+                <th>수</th>
+                <th>목</th>
+                <th>금</th>
+                <th>토</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td></td><td></td><td></td><td></td><td class="reserved">1</td><td>2</td><td>3</td>
+            </tr>
+            <tr>
+                <td>4</td><td>5</td><td>6</td><td class="today">7</td><td>8</td><td class="reserved">9</td><td>10</td>
+            </tr>
+            <tr>
+                <td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td>
+            </tr>
+            <tr>
+                <td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td>
+            </tr>
+            <tr>
+                <td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
+<script type="module" src="/component/header.js"></script>
 </body>
 </html>
