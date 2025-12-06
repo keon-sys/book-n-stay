@@ -13,18 +13,17 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.ZonedDateTime
 
 @RestController
-@RequestMapping("/api/booking")
 class BookingController(
     private val bookingUseCase: BookingUseCase,
 ) {
 
-    @GetMapping
+    @GetMapping("/api/booking")
     fun getBookings(
         @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) date: ZonedDateTime,
     ): BookingUseCase.BookingsResponse =
         bookingUseCase.getBookings(BookingUseCase.BookingsQuery(date = date))
 
-    @PostMapping
+    @PostMapping("/api/booking")
     fun setBooking(
         @RequestHeader("X-Kakao-Account-Id") accountId: String,
         @RequestBody request: BookingDto,

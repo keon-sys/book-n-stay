@@ -30,3 +30,10 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          volumeMounts:
+            - name: app-data
+              mountPath: /var/book-n-stay/data
+      volumes:
+        - name: app-data
+          persistentVolumeClaim:
+            claimName: book-n-stay-pvc
