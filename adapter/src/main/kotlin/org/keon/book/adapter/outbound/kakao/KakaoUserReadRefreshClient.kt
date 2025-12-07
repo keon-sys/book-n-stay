@@ -29,7 +29,7 @@ class KakaoUserReadRefreshClient(
                     )
                     val user = delegate.invoke(newRequest)
                     tokenCacheSaveRepository(KakaoTokenCacheSaveRepository.Request(
-                        userId = user.id,
+                        accountId = user.accountId,
                         accessToken = newToken.accessToken,
                         refreshToken = newToken.refreshToken,
                         expiresIn = newToken.expiresIn,

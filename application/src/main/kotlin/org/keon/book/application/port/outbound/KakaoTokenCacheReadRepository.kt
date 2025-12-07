@@ -4,7 +4,7 @@ interface KakaoTokenCacheReadRepository {
     operator fun invoke(request: Request): Result?
 
     data class Request(
-        val userId: String,
+        val accountId: String,
     )
 
     data class Result(

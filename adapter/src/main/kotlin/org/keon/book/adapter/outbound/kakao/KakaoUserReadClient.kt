@@ -38,10 +38,10 @@ class KakaoUserReadClient(
             throw KakaoAuthenticationException("Failed to call Kakao user info API.", ex)
         }
 
-        val kakaoId = response?.id
+        val accountId = response?.id
             ?: throw KakaoAuthenticationException("Kakao response did not contain an id.")
         return KakaoUserReadRepository.Result(
-            id = kakaoId.toString(),
+            accountId = accountId.toString(),
             nickname = response.kakaoAccount?.profile?.nickname,
         )
     }

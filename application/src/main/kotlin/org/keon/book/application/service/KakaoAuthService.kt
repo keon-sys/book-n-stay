@@ -20,14 +20,14 @@ class KakaoAuthService(
             refreshToken = null,
         ))
         kakaoTokenCacheSaveRepository(KakaoTokenCacheSaveRepository.Request(
-            userId = user.id,
+            accountId = user.accountId,
             accessToken = command.accessToken,
             refreshToken = null,
             expiresIn = null,
             refreshTokenExpiresIn = null,
         ))
         return KakaoSessionCreateUseCase.Response(
-            id = user.id,
+            accountId = user.accountId,
             nickname = user.nickname,
         )
     }

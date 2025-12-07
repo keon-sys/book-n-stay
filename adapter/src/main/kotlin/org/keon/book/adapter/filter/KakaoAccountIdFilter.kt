@@ -57,7 +57,7 @@ class KakaoAccountIdFilter(
     private fun handleAccessToken(accessToken: String): String {
         val session = KakaoSessionCreateUseCase.Command(accessToken)
             .run { kakaoSessionCreateUseCase(this) }
-        return session.id
+        return session.accountId
     }
 
     private fun cookieToken(request: HttpServletRequest): String? =

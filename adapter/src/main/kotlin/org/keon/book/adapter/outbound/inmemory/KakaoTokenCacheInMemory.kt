@@ -15,7 +15,7 @@ class KakaoTokenCacheInMemory :
     private val tokenStore = ConcurrentHashMap<String, KakaoTokenCacheEntity>()
 
     override fun invoke(request: KakaoTokenCacheSaveRepository.Request) {
-        tokenStore[request.userId] = KakaoTokenCacheEntity(
+        tokenStore[request.accountId] = KakaoTokenCacheEntity(
             accessToken = request.accessToken,
             refreshToken = request.refreshToken,
             expiresIn = request.expiresIn,
@@ -24,7 +24,7 @@ class KakaoTokenCacheInMemory :
     }
 
     override fun invoke(request: KakaoTokenCacheReadRepository.Request): KakaoTokenCacheReadRepository.Result? {
-        return tokenStore[request.userId]?.let { entity ->
+        return tokenStore[request.accountId]?.let { entity ->
             KakaoTokenCacheReadRepository.Result(
                 accessToken = entity.accessToken,
                 refreshToken = entity.refreshToken,
@@ -35,7 +35,7 @@ class KakaoTokenCacheInMemory :
     }
 
     override fun invoke(request: KakaoTokenCacheDeleteRepository.Request) {
-        tokenStore.remove(request.userId)
+        tokenStore.remove(request.accountId)
     }
 
     private data class KakaoTokenCacheEntity(

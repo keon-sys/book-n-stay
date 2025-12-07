@@ -4,6 +4,6 @@ interface KakaoTokenCacheDeleteRepository {
     operator fun invoke(request: Request)
 
     data class Request(
-        val userId: String,
+        val accountId: String,
     )
 }

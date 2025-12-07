@@ -8,7 +8,7 @@ interface KakaoSessionCreateUseCase {
     )
 
     data class Response(
-        val id: String,
+        val accountId: String,
         val nickname: String?,
     )
 }

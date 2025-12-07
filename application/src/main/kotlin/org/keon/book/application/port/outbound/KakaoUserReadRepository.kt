@@ -9,7 +9,7 @@ interface KakaoUserReadRepository {
     )
 
     data class Result(
-        val id: String,
+        val accountId: String,
         val nickname: String?,
     )
 }

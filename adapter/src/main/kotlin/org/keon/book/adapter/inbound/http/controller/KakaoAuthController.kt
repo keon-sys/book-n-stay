@@ -53,7 +53,7 @@ class KakaoAuthController(
             .run(kakaoAccessTokenReadUseCase::invoke)
             .let { KakaoSessionCreateUseCase.Command(it.accessToken) }
             .run(kakaoSessionCreateUseCase::invoke)
-            .let { tokenService.createToken(it.id) }
+            .let { tokenService.createToken(it.accountId) }
 
         response.addHeader("Set-Cookie", buildCookie(jwt).toString())
 
