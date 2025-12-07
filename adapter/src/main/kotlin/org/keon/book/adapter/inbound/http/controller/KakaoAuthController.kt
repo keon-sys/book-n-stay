@@ -1,4 +1,4 @@
-package org.keon.book.adapter.inbound.web.controller
+package org.keon.book.adapter.inbound.http.controller
 
 import jakarta.servlet.http.HttpServletResponse
 import org.keon.book.adapter.auth.JwtAuthTokenService
@@ -8,7 +8,10 @@ import org.keon.book.application.port.inbound.KakaoSessionCreateUseCase
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -29,32 +32,6 @@ class KakaoAuthController(
             redirectUri = securityKakaoProperty.redirectUri,
         )
 
-    @PostMapping("/api/v1/auth/kakao/session", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun createSession(
-        @RequestBody request: KakaoSessionRequest,
-        response: HttpServletResponse,
-    ): ResponseEntity<KakaoSessionResponse> {
-        val sessionResult = KakaoSessionCreateUseCase.Command(request.accessToken)
-            .run { kakaoSessionCreateUseCase(this) }
-        val token = tokenService.createToken(sessionResult.id)
-        response.addHeader("Set-Cookie", buildCookie(token).toString())
-        return ResponseEntity
-            .created(URI("/"))
-            .body(KakaoSessionResponse(
-                id = sessionResult.id,
-                nickname = sessionResult.nickname,
-            ))
-    }
-
-    @PostMapping("/api/v1/auth/kakao/token", consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun exchangeCode(
-        @RequestBody request: KakaoCodeRequest
-    ): ResponseEntity<KakaoAccessTokenReadUseCase.Response> {
-        val token = KakaoAccessTokenReadUseCase.Query(request.authorizationCode, securityKakaoProperty.redirectUri)
-            .run(kakaoAccessTokenReadUseCase::invoke)
-        return ResponseEntity.ok(token)
-    }
-
     @PostMapping("/api/v1/auth/kakao/logout")
     fun logout(response: HttpServletResponse): ResponseEntity<Void> {
         response.addHeader("Set-Cookie", deleteCookie().toString())
@@ -67,16 +44,25 @@ class KakaoAuthController(
         @RequestParam(name = "state", required = false) state: String?,
         response: HttpServletResponse,
     ): ResponseEntity<Void> {
-        val token = KakaoAccessTokenReadUseCase.Query(authorizationCode, securityKakaoProperty.redirectUri)
+        // OAuth 2.0 Authorization Code Flow
+        // 1. Exchange authorization code for access token (server-to-server)
+        // 2. Get user info from Kakao API using access token
+        // 3. Create JWT session token and set httpOnly cookie
+        // 4. Redirect to original page (from state parameter)
+        val jwt = KakaoAccessTokenReadUseCase.Query(authorizationCode, securityKakaoProperty.redirectUri)
             .run(kakaoAccessTokenReadUseCase::invoke)
-        val authResult = KakaoSessionCreateUseCase.Command(token.accessToken)
+            .let { KakaoSessionCreateUseCase.Command(it.accessToken) }
             .run(kakaoSessionCreateUseCase::invoke)
-        val jwt = tokenService.createToken(authResult.id)
+            .let { tokenService.createToken(it.id) }
+
         response.addHeader("Set-Cookie", buildCookie(jwt).toString())
+
+        // state parameter contains the original URL to redirect after login
         val target = state
             ?.takeIf { it.isNotBlank() }
             ?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
             ?: "/"
+
         return ResponseEntity.status(302)
             .location(URI.create(target))
             .build()
@@ -100,21 +86,8 @@ class KakaoAuthController(
             .maxAge(0)
             .build()
 
-    data class KakaoSessionRequest(
-        val accessToken: String,
-    )
-
-    data class KakaoCodeRequest(
-        val authorizationCode: String,
-    )
-
     data class KakaoConfigResponse(
         val javascriptKey: String,
         val redirectUri: String,
-    )
-
-    data class KakaoSessionResponse(
-        val id: String,
-        val nickname: String?,
     )
 }

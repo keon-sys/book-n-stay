@@ -63,38 +63,7 @@
             }
         }
 
-        async function loginWithKakao() {
-            if (!await ensureKakaoReady()) {
-                return;
-            }
-            Kakao.Auth.login({
-                scope: 'profile_nickname',
-                success: function(authObj) {
-                    document.getElementById('token').textContent = authObj.access_token;
-                    fetch('/api/v1/auth/kakao/session', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ accessToken: authObj.access_token })
-                    }).then(function(res) {
-                        return res.json();
-                    }).then(function(body) {
-                        document.getElementById('server-response').textContent = JSON.stringify(body, null, 2);
-                        if (returnTo) {
-                            window.location.href = returnTo;
-                        }
-                    }).catch(function(err) {
-                        document.getElementById('server-response').textContent = err;
-                    });
-                },
-                fail: function(err) {
-                    alert(JSON.stringify(err));
-                }
-            });
-        }
-
-        async function redirectLogin() {
+        async function login() {
             if (!await ensureKakaoReady()) {
                 return;
             }
@@ -132,13 +101,10 @@
 </head>
 <body>
 <h1>Kakao Login</h1>
-<p>JavaScript SDK로 로그인 후 REST API(`/v2/user/me`)를 백엔드에서 호출합니다.</p>
+<p>OAuth 2.0 Authorization Code Flow를 사용하여 카카오 로그인을 수행합니다.</p>
 <p>Redirect URI: <code id="redirect"></code></p>
-<button onclick="loginWithKakao()">카카오 로그인 (Implicit)</button>
-<button onclick="redirectLogin()" style="margin-left:8px;">카카오 로그인 (Redirect)</button>
-<h2>Access Token</h2>
-<pre id="token">로그인 후 토큰이 표시됩니다.</pre>
-<h2>Server Response</h2>
-<pre id="server-response">/api/v1/auth/kakao/session 응답이 표시됩니다.</pre>
+<button onclick="login()">카카오 로그인</button>
+<h2>Status</h2>
+<pre id="server-response">로그인 버튼을 클릭하세요.</pre>
 </body>
 </html>
