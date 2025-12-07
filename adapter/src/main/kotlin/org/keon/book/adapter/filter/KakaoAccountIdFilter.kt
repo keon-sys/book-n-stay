@@ -2,23 +2,22 @@ package org.keon.book.adapter.filter
 
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
 import org.keon.book.adapter.auth.JwtAuthTokenService
-import org.keon.book.application.port.inbound.AuthUseCase
+import org.keon.book.adapter.config.Properties
+import org.keon.book.adapter.exception.KakaoAuthenticationException
+import org.keon.book.application.port.inbound.KakaoSessionCreateUseCase
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.net.URLEncoder
-import java.util.Collections
-import jakarta.servlet.http.HttpServletRequestWrapper
-import org.keon.book.adapter.config.Properties
-import org.keon.book.adapter.exception.KakaoAuthenticationException
-import java.util.Locale
+import java.util.*
 
 @Component
 class KakaoAccountIdFilter(
-    private val authUseCase: AuthUseCase,
+    private val kakaoSessionCreateUseCase: KakaoSessionCreateUseCase,
     private val tokenService: JwtAuthTokenService,
     private val securityAuthProperty: Properties.SecurityAuthProperty,
 ) : OncePerRequestFilter() {
@@ -56,8 +55,9 @@ class KakaoAccountIdFilter(
     }
 
     private fun handleAccessToken(accessToken: String): String {
-        val session = authUseCase.createSession(accessToken)
-        return session.user.id
+        val session = KakaoSessionCreateUseCase.Command(accessToken)
+            .run { kakaoSessionCreateUseCase(this) }
+        return session.id
     }
 
     private fun cookieToken(request: HttpServletRequest): String? =
@@ -114,7 +114,7 @@ class KakaoAccountIdFilter(
             return if (name.lowercase(Locale.getDefault()) == headerName) accountId else super.getHeader(name)
         }
 
-        override fun getHeaders(name: String?): java.util.Enumeration<String> {
+        override fun getHeaders(name: String?): Enumeration<String> {
             name ?: return Collections.emptyEnumeration()
             return if (name.lowercase(Locale.getDefault()) == headerName) {
                 Collections.enumeration(listOf(accountId))
@@ -123,7 +123,7 @@ class KakaoAccountIdFilter(
             }
         }
 
-        override fun getHeaderNames(): java.util.Enumeration<String> {
+        override fun getHeaderNames(): Enumeration<String> {
             val names = mutableSetOf<String>()
             Collections.list(super.getHeaderNames())
                 .filter { it.lowercase(Locale.getDefault()) != headerName }

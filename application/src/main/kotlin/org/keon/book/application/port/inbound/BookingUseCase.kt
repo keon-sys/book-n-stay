@@ -19,6 +19,6 @@ interface BookingUseCase {
     )
 
     data class BookingsResponse(
-        val accountIds: List<String>,
+        val userIds: List<String>,
     )
 }

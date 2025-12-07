@@ -169,6 +169,6 @@ gradle-app.setting
 
 ### Custom ###
 AGENTS.md
-claude.md
-./claude/**
-adapter/src/main/resources/custom/**
+CLAUDE.md
+.claude/
+adapter/src/main/resources/custom/
