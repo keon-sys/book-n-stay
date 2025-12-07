@@ -11,7 +11,7 @@ security:
     token-secret: ${AUTH_TOKEN_SECRET:}
     issuer: book-n-stay
     token-validity: PT30M
-    cookie-name: AUTH
+    cookie-name: auth_token
     cookie-path: /
     cookie-same-site: Lax
     cookie-secure: false

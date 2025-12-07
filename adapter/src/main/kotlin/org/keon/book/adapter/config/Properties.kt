@@ -12,7 +12,6 @@ data class Properties(
     val securityAuthProperty: SecurityAuthProperty,
     val securityKakaoProperty: SecurityKakaoProperty,
     val kakaoAccountIdProperty: KakaoAccountIdProperty,
-    val cacheProperty: CacheProperty,
 ) {
     @ConfigurationProperties(prefix = "app")
     data class AppProperty(
@@ -51,14 +50,4 @@ data class Properties(
         val kakaoBaseUrl: String,
         val kakaoAuthBaseUrl: String,
     )
-
-    @ConfigurationProperties(prefix = "cache")
-    data class CacheProperty(
-        val kakaoUser: KakaoUserCacheProperty,
-    ) {
-        data class KakaoUserCacheProperty(
-            val ttl: Duration,
-            val maximumSize: Long,
-        )
-    }
 }
