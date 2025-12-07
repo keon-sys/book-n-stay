@@ -1,40 +1,38 @@
 package org.keon.book.adapter.inbound.http.controller
 
-import org.keon.book.application.port.inbound.BookingUseCase
+import org.keon.book.application.port.inbound.BookingCreateUseCase
+import org.keon.book.application.port.inbound.BookingDeleteUseCase
+import org.keon.book.application.port.inbound.BookingReadUseCase
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.web.bind.annotation.*
 import java.time.ZonedDateTime
 
 @RestController
 class BookingController(
-    private val bookingUseCase: BookingUseCase,
+    private val bookingReadUseCase: BookingReadUseCase,
+    private val bookingCreateUseCase: BookingCreateUseCase,
+    private val bookingDeleteUseCase: BookingDeleteUseCase,
 ) {
 
-    @GetMapping("/api/booking")
+    @GetMapping("/api/v1/booking")
     fun getBookings(
         @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) date: ZonedDateTime,
-    ): BookingUseCase.BookingsResponse =
-        bookingUseCase.getBookings(BookingUseCase.BookingsQuery(date = date))
+    ): BookingReadUseCase.Response =
+        bookingReadUseCase(BookingReadUseCase.Query(date = date))
 
-    @PostMapping("/api/booking")
+    @PostMapping("/api/v1/booking")
     fun setBooking(
         @RequestHeader("X-Kakao-Account-Id") accountId: String,
         @RequestBody request: BookingDto,
-    ) {
-        bookingUseCase.setBooking(
-            BookingUseCase.BookingCommand(date = request.date, accountId = accountId),
-        )
-    }
+    ): BookingCreateUseCase.Response =
+        bookingCreateUseCase(BookingCreateUseCase.Command(date = request.date, accountId = accountId))
 
-    @DeleteMapping
+    @DeleteMapping("/api/v1/booking")
     fun removeBooking(
         @RequestHeader("X-Kakao-Account-Id") accountId: String,
         @RequestBody request: BookingDto,
-    ) {
-        bookingUseCase.removeBooking(
-            BookingUseCase.BookingCommand(date = request.date, accountId = accountId),
-        )
-    }
+    ): BookingDeleteUseCase.Response =
+        bookingDeleteUseCase(BookingDeleteUseCase.Command(date = request.date, accountId = accountId))
 
     data class BookingDto(
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

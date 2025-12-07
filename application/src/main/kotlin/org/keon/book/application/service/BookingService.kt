@@ -1,6 +1,8 @@
 package org.keon.book.application.service
 
-import org.keon.book.application.port.inbound.BookingUseCase
+import org.keon.book.application.port.inbound.BookingCreateUseCase
+import org.keon.book.application.port.inbound.BookingDeleteUseCase
+import org.keon.book.application.port.inbound.BookingReadUseCase
 import org.keon.book.application.port.outbound.BookingCreateRepository
 import org.keon.book.application.port.outbound.BookingDeleteRepository
 import org.keon.book.application.port.outbound.BookingReadRepository
@@ -11,14 +13,14 @@ class BookingService(
     private val bookingReadRepository: BookingReadRepository,
     private val bookingCreateRepository: BookingCreateRepository,
     private val bookingDeleteRepository: BookingDeleteRepository,
-) : BookingUseCase {
+) : BookingReadUseCase, BookingCreateUseCase, BookingDeleteUseCase {
 
-    override fun getBookings(query: BookingUseCase.BookingsQuery): BookingUseCase.BookingsResponse {
+    override fun invoke(query: BookingReadUseCase.Query): BookingReadUseCase.Response {
         val result = bookingReadRepository(BookingReadRepository.Request(query.date))
-        return BookingUseCase.BookingsResponse(result.bookings.map { it.accountId })
+        return BookingReadUseCase.Response(result.bookings.map { it.accountId })
     }
 
-    override fun setBooking(command: BookingUseCase.BookingCommand) {
+    override fun invoke(command: BookingCreateUseCase.Command): BookingCreateUseCase.Response {
         val startOfDay = command.date.toLocalDate().atStartOfDay(command.date.zone)
         val endOfDay = startOfDay.plusDays(1)
         bookingCreateRepository(BookingCreateRepository.Request(
@@ -26,9 +28,13 @@ class BookingService(
             to = endOfDay,
             accountId = command.accountId,
         ))
+        return BookingCreateUseCase.Response(
+            date = command.date,
+            accountId = command.accountId,
+        )
     }
 
-    override fun removeBooking(command: BookingUseCase.BookingCommand) {
+    override fun invoke(command: BookingDeleteUseCase.Command): BookingDeleteUseCase.Response {
         val startOfDay = command.date.toLocalDate().atStartOfDay(command.date.zone)
         val endOfDay = startOfDay.plusDays(1)
         bookingDeleteRepository(BookingDeleteRepository.Request(
@@ -36,5 +42,9 @@ class BookingService(
             to = endOfDay,
             accountId = command.accountId,
         ))
+        return BookingDeleteUseCase.Response(
+            date = command.date,
+            accountId = command.accountId,
+        )
     }
 }

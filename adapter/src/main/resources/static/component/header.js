@@ -1,6 +1,6 @@
 const headerTemplate = `
     <div class="header-bar">
-        <div class="header-brand">Book n Stay</div>
+        <a class="header-brand" href="/">Book n Stay</a>
         <div class="header-actions">
             <button class="header-button" id="header-logout">로그아웃</button>
         </div>
