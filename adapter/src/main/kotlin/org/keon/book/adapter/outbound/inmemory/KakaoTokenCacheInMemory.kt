@@ -1,15 +1,21 @@
 package org.keon.book.adapter.outbound.inmemory
 
-import org.keon.book.application.port.outbound.KakaoTokenCacheRepository
+import org.keon.book.application.port.outbound.KakaoTokenCacheDeleteRepository
+import org.keon.book.application.port.outbound.KakaoTokenCacheReadRepository
+import org.keon.book.application.port.outbound.KakaoTokenCacheSaveRepository
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-class KakaoTokenCacheInMemory : KakaoTokenCacheRepository {
-    private val tokenStore = ConcurrentHashMap<String, KakaoTokenCacheRepository.FindResult>()
+class KakaoTokenCacheInMemory :
+    KakaoTokenCacheSaveRepository,
+    KakaoTokenCacheReadRepository,
+    KakaoTokenCacheDeleteRepository {
 
-    override fun save(request: KakaoTokenCacheRepository.SaveRequest) {
-        tokenStore[request.userId] = KakaoTokenCacheRepository.FindResult(
+    private val tokenStore = ConcurrentHashMap<String, KakaoTokenCacheEntity>()
+
+    override fun invoke(request: KakaoTokenCacheSaveRepository.Request) {
+        tokenStore[request.userId] = KakaoTokenCacheEntity(
             accessToken = request.accessToken,
             refreshToken = request.refreshToken,
             expiresIn = request.expiresIn,
@@ -17,11 +23,25 @@ class KakaoTokenCacheInMemory : KakaoTokenCacheRepository {
         )
     }
 
-    override fun findByUserId(request: KakaoTokenCacheRepository.FindRequest): KakaoTokenCacheRepository.FindResult? {
-        return tokenStore[request.userId]
+    override fun invoke(request: KakaoTokenCacheReadRepository.Request): KakaoTokenCacheReadRepository.Result? {
+        return tokenStore[request.userId]?.let { entity ->
+            KakaoTokenCacheReadRepository.Result(
+                accessToken = entity.accessToken,
+                refreshToken = entity.refreshToken,
+                expiresIn = entity.expiresIn,
+                refreshTokenExpiresIn = entity.refreshTokenExpiresIn,
+            )
+        }
     }
 
-    override fun delete(request: KakaoTokenCacheRepository.DeleteRequest) {
+    override fun invoke(request: KakaoTokenCacheDeleteRepository.Request) {
         tokenStore.remove(request.userId)
     }
+
+    private data class KakaoTokenCacheEntity(
+        val accessToken: String,
+        val refreshToken: String?,
+        val expiresIn: Int?,
+        val refreshTokenExpiresIn: Int?,
+    )
 }

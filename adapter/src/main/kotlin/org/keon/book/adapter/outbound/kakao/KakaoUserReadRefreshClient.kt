@@ -1,8 +1,8 @@
 package org.keon.book.adapter.outbound.kakao
 
 import org.keon.book.adapter.exception.KakaoAuthenticationException
+import org.keon.book.application.port.outbound.KakaoTokenCacheSaveRepository
 import org.keon.book.application.port.outbound.KakaoTokenRefreshRepository
-import org.keon.book.application.port.outbound.KakaoTokenCacheRepository
 import org.keon.book.application.port.outbound.KakaoUserReadRepository
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 class KakaoUserReadRefreshClient(
     private val delegate: KakaoUserReadClient,
     private val tokenRefreshRepository: KakaoTokenRefreshRepository,
-    private val tokenRepository: KakaoTokenCacheRepository,
+    private val tokenCacheSaveRepository: KakaoTokenCacheSaveRepository,
 ) : KakaoUserReadRepository {
 
     override fun invoke(request: KakaoUserReadRepository.Request): KakaoUserReadRepository.Result {
@@ -28,7 +28,7 @@ class KakaoUserReadRefreshClient(
                         refreshToken = newToken.refreshToken,
                     )
                     val user = delegate.invoke(newRequest)
-                    tokenRepository.save(KakaoTokenCacheRepository.SaveRequest(
+                    tokenCacheSaveRepository(KakaoTokenCacheSaveRepository.Request(
                         userId = user.id,
                         accessToken = newToken.accessToken,
                         refreshToken = newToken.refreshToken,

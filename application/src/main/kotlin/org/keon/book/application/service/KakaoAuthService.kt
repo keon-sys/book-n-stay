@@ -2,8 +2,8 @@ package org.keon.book.application.service
 
 import org.keon.book.application.port.inbound.KakaoAccessTokenReadUseCase
 import org.keon.book.application.port.inbound.KakaoSessionCreateUseCase
+import org.keon.book.application.port.outbound.KakaoTokenCacheSaveRepository
 import org.keon.book.application.port.outbound.KakaoTokenReadRepository
-import org.keon.book.application.port.outbound.KakaoTokenCacheRepository
 import org.keon.book.application.port.outbound.KakaoUserReadRepository
 import org.springframework.stereotype.Service
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 class KakaoAuthService(
     private val kakaoUserReadRepository: KakaoUserReadRepository,
     private val kakaoTokenReadRepository: KakaoTokenReadRepository,
-    private val kakaoTokenCacheRepository: KakaoTokenCacheRepository,
+    private val kakaoTokenCacheSaveRepository: KakaoTokenCacheSaveRepository,
 ) : KakaoSessionCreateUseCase, KakaoAccessTokenReadUseCase {
 
     override fun invoke(command: KakaoSessionCreateUseCase.Command): KakaoSessionCreateUseCase.Response {
@@ -19,7 +19,7 @@ class KakaoAuthService(
             accessToken = command.accessToken,
             refreshToken = null,
         ))
-        kakaoTokenCacheRepository.save(KakaoTokenCacheRepository.SaveRequest(
+        kakaoTokenCacheSaveRepository(KakaoTokenCacheSaveRepository.Request(
             userId = user.id,
             accessToken = command.accessToken,
             refreshToken = null,
