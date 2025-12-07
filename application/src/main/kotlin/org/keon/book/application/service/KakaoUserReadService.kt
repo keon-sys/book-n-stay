@@ -12,14 +12,16 @@ class KakaoUserReadService(
 ) : KakaoUserReadUseCase {
 
     override fun invoke(query: KakaoUserReadUseCase.Query): KakaoUserReadUseCase.Response {
-        val token = kakaoTokenCacheReadRepository(KakaoTokenCacheReadRepository.Request(
-            accountId = query.accountId,
-        )) ?: throw IllegalStateException("Token not found for accountId: ${query.accountId}")
+        val token = kakaoTokenCacheReadRepository(
+            KakaoTokenCacheReadRepository.Request(accountId = query.accountId,)
+        ) ?: throw IllegalStateException("Token not found for accountId: ${query.accountId}")
 
-        val user = kakaoUserReadRepository(KakaoUserReadRepository.Request(
-            accessToken = token.accessToken,
-            refreshToken = token.refreshToken,
-        ))
+        val user = kakaoUserReadRepository(
+            KakaoUserReadRepository.Request(
+                accessToken = token.accessToken,
+                refreshToken = token.refreshToken,
+            )
+        )
 
         return KakaoUserReadUseCase.Response(
             accountId = user.accountId,
