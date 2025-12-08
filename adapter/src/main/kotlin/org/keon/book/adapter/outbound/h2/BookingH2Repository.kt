@@ -4,7 +4,7 @@ import jakarta.persistence.*
 import org.keon.book.application.port.outbound.BookingCreateRepository
 import org.keon.book.application.port.outbound.BookingDeleteRepository
 import org.keon.book.application.port.outbound.BookingsReadRepository
-import org.keon.book.application.port.outbound.MyBookingsReadRepository
+import org.keon.book.application.port.outbound.UserBookingsReadRepository
 import org.keon.book.application.type.EpochSecond
 import org.springframework.context.annotation.Profile
 import org.springframework.data.jpa.repository.JpaRepository
@@ -43,7 +43,7 @@ interface BookingJpaRepository : JpaRepository<BookingEntity, Long> {
 @Profile("dev")
 class BookingH2Repository(
     private val jpaRepository: BookingJpaRepository,
-) : BookingsReadRepository, MyBookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {
+) : BookingsReadRepository, UserBookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {
 
     override fun invoke(request: BookingsReadRepository.Request): BookingsReadRepository.Result {
         // request.date는 특정 날짜의 시작 시각 (00:00:00 UTC)
@@ -81,10 +81,10 @@ class BookingH2Repository(
         )
     }
 
-    override fun invoke(request: MyBookingsReadRepository.Request): MyBookingsReadRepository.Result {
+    override fun invoke(request: UserBookingsReadRepository.Request): UserBookingsReadRepository.Result {
         val entities = jpaRepository.findByAccountId(request.accountId)
         val bookings = entities.map { entity ->
-            MyBookingsReadRepository.BookingData(
+            UserBookingsReadRepository.BookingData(
                 id = entity.id,
                 from = EpochSecond(entity.from),
                 to = EpochSecond(entity.to),
@@ -92,7 +92,7 @@ class BookingH2Repository(
                 nickname = entity.nickname,
             )
         }
-        return MyBookingsReadRepository.Result(bookings)
+        return UserBookingsReadRepository.Result(bookings)
     }
 
     override fun invoke(request: BookingDeleteRepository.Request) {

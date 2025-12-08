@@ -3,18 +3,18 @@ package org.keon.book.application.service
 import org.keon.book.application.port.inbound.BookingCreateUseCase
 import org.keon.book.application.port.inbound.BookingDeleteUseCase
 import org.keon.book.application.port.inbound.BookingsReadUseCase
-import org.keon.book.application.port.inbound.MyBookingsReadUseCase
+import org.keon.book.application.port.inbound.UserBookingsReadUseCase
 import org.keon.book.application.port.outbound.*
 import org.springframework.stereotype.Service
 
 @Service
 class BookingService(
     private val bookingsReadRepository: BookingsReadRepository,
-    private val myBookingsReadRepository: MyBookingsReadRepository,
+    private val userBookingsReadRepository: UserBookingsReadRepository,
     private val bookingCreateRepository: BookingCreateRepository,
     private val bookingDeleteRepository: BookingDeleteRepository,
     private val kakaoUserReadRepository: KakaoUserReadRepository,
-) : BookingsReadUseCase, MyBookingsReadUseCase, BookingCreateUseCase, BookingDeleteUseCase {
+) : BookingsReadUseCase, UserBookingsReadUseCase, BookingCreateUseCase, BookingDeleteUseCase {
 
     override fun invoke(query: BookingsReadUseCase.Query): BookingsReadUseCase.Response {
         val result = bookingsReadRepository(BookingsReadRepository.Request(query.date))
@@ -29,17 +29,17 @@ class BookingService(
         return BookingsReadUseCase.Response(bookings)
     }
 
-    override fun invoke(query: MyBookingsReadUseCase.Query): MyBookingsReadUseCase.Response {
-        val result = myBookingsReadRepository(MyBookingsReadRepository.Request(query.accountId))
+    override fun invoke(query: UserBookingsReadUseCase.Query): UserBookingsReadUseCase.Response {
+        val result = userBookingsReadRepository(UserBookingsReadRepository.Request(query.accountId))
         val bookings = result.bookings.map { booking ->
-            MyBookingsReadUseCase.BookingInfo(
+            UserBookingsReadUseCase.BookingInfo(
                 bookingId = booking.id,
                 from = booking.from,
                 to = booking.to,
                 nickname = booking.nickname,
             )
         }
-        return MyBookingsReadUseCase.Response(bookings)
+        return UserBookingsReadUseCase.Response(bookings)
     }
 
     override fun invoke(command: BookingCreateUseCase.Command): BookingCreateUseCase.Response {

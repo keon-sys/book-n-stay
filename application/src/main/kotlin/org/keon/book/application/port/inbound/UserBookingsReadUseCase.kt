@@ -2,7 +2,7 @@ package org.keon.book.application.port.inbound
 
 import org.keon.book.application.type.EpochSecond
 
-interface MyBookingsReadUseCase {
+interface UserBookingsReadUseCase {
     operator fun invoke(query: Query): Response
 
     data class Query(

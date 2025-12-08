@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.keon.book.application.port.outbound.BookingCreateRepository
 import org.keon.book.application.port.outbound.BookingDeleteRepository
 import org.keon.book.application.port.outbound.BookingsReadRepository
-import org.keon.book.application.port.outbound.MyBookingsReadRepository
+import org.keon.book.application.port.outbound.UserBookingsReadRepository
 import org.keon.book.application.type.EpochSecond
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -30,7 +30,7 @@ class BookingFileRepository(
     @Value("\${booking.storage.path:./data/bookings.json}")
     private val storagePath: String,
     private val objectMapper: ObjectMapper,
-) : BookingsReadRepository, MyBookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {
+) : BookingsReadRepository, UserBookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {
 
     private val lock = ReentrantReadWriteLock()
     private val idGenerator = AtomicLong(0L)
@@ -105,12 +105,12 @@ class BookingFileRepository(
         }
     }
 
-    override fun invoke(request: MyBookingsReadRepository.Request): MyBookingsReadRepository.Result {
+    override fun invoke(request: UserBookingsReadRepository.Request): UserBookingsReadRepository.Result {
         val bookings = lock.read {
             readBookings()
                 .filter { it.accountId == request.accountId }
                 .map { entity ->
-                    MyBookingsReadRepository.BookingData(
+                    UserBookingsReadRepository.BookingData(
                         id = entity.id,
                         from = EpochSecond(entity.from),
                         to = EpochSecond(entity.to),
@@ -120,7 +120,7 @@ class BookingFileRepository(
                 }
         }
 
-        return MyBookingsReadRepository.Result(bookings)
+        return UserBookingsReadRepository.Result(bookings)
     }
 
     override fun invoke(request: BookingDeleteRepository.Request) {
