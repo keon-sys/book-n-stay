@@ -31,7 +31,7 @@ function setupGlobal401Interceptor() {
 
 async function fetchLoginStatus() {
     try {
-        const res = await fetch('/api/v1/users/me', { credentials: 'include' });
+        const res = await fetch('/api/v1/user/me', { credentials: 'include' });
         return res.ok;
     } catch (e) {
         console.warn('login status check failed', e);

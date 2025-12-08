@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.keon.book.adapter.config.Properties
 import org.keon.book.adapter.exception.KakaoAuthenticationException
-import org.keon.book.application.port.outbound.KakaoTokenRefreshRepository
+import org.keon.book.application.port.outbound.KakaoSessionReadRepository
 import org.keon.book.application.port.outbound.KakaoSessionSaveRepository
+import org.keon.book.application.port.outbound.KakaoTokenRefreshRepository
 import org.keon.book.application.port.outbound.KakaoUserReadRepository
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatusCode
@@ -17,8 +18,9 @@ import org.springframework.web.client.RestClientException
 class KakaoUserReadClient(
     builder: RestClient.Builder,
     kakaoAccountIdProperty: Properties.KakaoAccountIdProperty,
-    private val tokenRefreshRepository: KakaoTokenRefreshRepository,
-    private val tokenCacheSaveRepository: KakaoSessionSaveRepository,
+    private val kakaoTokenRefreshRepository: KakaoTokenRefreshRepository,
+    private val kakaoSessionReadRepository: KakaoSessionReadRepository,
+    private val kakaoSessionSaveRepository: KakaoSessionSaveRepository,
 ) : KakaoUserReadRepository {
 
     private val userClient = builder
@@ -27,10 +29,16 @@ class KakaoUserReadClient(
         .build()
 
     override fun invoke(request: KakaoUserReadRepository.Request): KakaoUserReadRepository.Result {
+        val (accessToken, refreshToken) = when (request) {
+            is KakaoUserReadRepository.Request.KakaoToken -> request.accessToken to request.refreshToken
+            is KakaoUserReadRepository.Request.AccountId ->
+                kakaoSessionReadRepository(KakaoSessionReadRepository.Request(request.accountId))
+                    .let { it.accessToken to it.refreshToken }
+        }
         return try {
-            fetchUserInfo(request.accessToken)
+            fetchUserInfo(accessToken)
         } catch (ex: KakaoAuthenticationException) {
-            val refreshToken = request.refreshToken
+            val refreshToken = refreshToken
             if (isTokenExpired(ex) && refreshToken != null) {
                 refreshTokenAndFetchUser(refreshToken)
             } else {
@@ -64,10 +72,10 @@ class KakaoUserReadClient(
     }
 
     private fun refreshTokenAndFetchUser(refreshToken: String): KakaoUserReadRepository.Result {
-        val newToken = tokenRefreshRepository(KakaoTokenRefreshRepository.Request(refreshToken))
+        val newToken = kakaoTokenRefreshRepository(KakaoTokenRefreshRepository.Request(refreshToken))
         return try {
             val user = fetchUserInfo(newToken.accessToken)
-            tokenCacheSaveRepository(
+            kakaoSessionSaveRepository(
                 KakaoSessionSaveRepository.Request(
                     accountId = user.accountId,
                     accessToken = newToken.accessToken,

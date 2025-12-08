@@ -24,7 +24,7 @@ class UserController(
     ): KakaoUserReadUseCase.Response =
         kakaoUserReadUseCase(KakaoUserReadUseCase.Query(accountId))
 
-    @GetMapping("/api/v1/user/bookings")
+    @GetMapping("/api/v1/user/me/bookings")
     fun getCurrentUserBookings(
         @RequestHeader(HEADER_ACCOUNT_ID) accountId: String,
     ): MyBookingsReadUseCase.Response =

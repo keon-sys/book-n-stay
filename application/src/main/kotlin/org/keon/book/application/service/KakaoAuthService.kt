@@ -15,7 +15,7 @@ class KakaoAuthService(
 ) : KakaoSessionCreateUseCase, KakaoAccessTokenReadUseCase {
 
     override fun invoke(command: KakaoSessionCreateUseCase.Command): KakaoSessionCreateUseCase.Response {
-        val user = kakaoUserReadRepository(KakaoUserReadRepository.Request(
+        val user = kakaoUserReadRepository(KakaoUserReadRepository.Request.KakaoToken(
             accessToken = command.accessToken,
             refreshToken = null,
         ))

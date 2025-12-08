@@ -1,17 +1,8 @@
 (() => {
     const MAX_CAPACITY = 8;
-    const bookings = [
-        { guest: '김민수', start: '2025-12-02', end: '2025-12-04' },
-        { guest: '박지현', start: '2025-12-07', end: '2025-12-09' },
-        { guest: '홍은지', start: '2025-12-07', end: '2025-12-07' },
-        { guest: '이재훈', start: '2025-12-11', end: '2025-12-14' },
-        { guest: '최서윤', start: '2025-12-15', end: '2025-12-18' },
-        { guest: '이가영', start: '2025-12-20', end: '2025-12-22' },
-        { guest: '조수영', start: '2025-12-20', end: '2025-12-22' },
-        { guest: '강태오', start: '2025-12-22', end: '2025-12-24' },
-        { guest: '오하늘', start: '2025-12-27', end: '2025-12-30' },
-        { guest: '정윤아', start: '2025-12-30', end: '2025-12-30' }
-    ];
+    const bookings = [];
+    const bookingKeys = new Set();
+    const loadedDates = new Set();
 
     const monthLabel = document.getElementById('month-label');
     const rangeDisplay = document.getElementById('range-display');
@@ -20,6 +11,7 @@
     const calendarGrid = document.getElementById('calendar-grid');
     const prevBtn = document.getElementById('prev-month');
     const nextBtn = document.getElementById('next-month');
+    const bookBtn = document.getElementById('book-btn');
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `
@@ -61,6 +53,32 @@
         return new Date(y, m - 1, d);
     }
 
+    function toEpochSecond(date) {
+        return Math.floor(date.getTime() / 1000);
+    }
+
+    function bookingKey(payload) {
+        const id = payload.bookingId ?? payload.id;
+        if (id != null) {
+            return `id:${id}`;
+        }
+        return `${payload.from}-${payload.to}-${payload.nickname || ''}`;
+    }
+
+    function storeBooking(payload) {
+        const key = bookingKey(payload);
+        if (bookingKeys.has(key)) return;
+        bookingKeys.add(key);
+        const from = Number(payload.from ?? payload.start);
+        const to = Number(payload.to ?? payload.end ?? payload.start);
+        bookings.push({
+            id: payload.bookingId ?? payload.id ?? null,
+            nickname: payload.nickname ?? '알 수 없음',
+            start: formatDate(new Date(from * 1000)),
+            end: formatDate(new Date(to * 1000)),
+        });
+    }
+
     function isBeforeToday(dateStr) {
         return parseDate(dateStr) < todayStart;
     }
@@ -73,12 +91,14 @@
         if (!selectedStart && !selectedEnd) {
             rangeDisplay.textContent = '선택 없음';
             rangeMeta.textContent = '날짜를 탭하거나 드래그해 선택하세요';
+            if (bookBtn) bookBtn.disabled = true;
             return;
         }
 
         if (selectedStart && !selectedEnd) {
             rangeDisplay.textContent = `${selectedStart} ~ ?`;
             rangeMeta.textContent = '종료일을 선택하세요';
+            if (bookBtn) bookBtn.disabled = true;
             return;
         }
 
@@ -86,6 +106,7 @@
 
         const diff = dayDiff(selectedStart, selectedEnd);
         rangeMeta.textContent = `${diff + 1}일`;
+        if (bookBtn) bookBtn.disabled = false;
     }
 
     function isSameDay(a, b) {
@@ -178,15 +199,45 @@
         });
     }
 
-    prevBtn.addEventListener('click', () => {
-        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
-        renderCalendar();
-    });
+    async function loadBookingsForDate(dateStr) {
+        if (loadedDates.has(dateStr)) return;
+        const epoch = toEpochSecond(parseDate(dateStr));
+        const res = await fetch(`/api/v1/bookings?date=${epoch}`, { credentials: 'include' });
+        if (!res.ok) {
+            throw new Error(`예약을 불러오지 못했습니다. (${res.status})`);
+        }
+        const data = await res.json();
+        const list = Array.isArray(data.bookings) ? data.bookings : [];
+        list.forEach(storeBooking);
+        loadedDates.add(dateStr);
+    }
 
-    nextBtn.addEventListener('click', () => {
-        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+    async function loadBookingsForCurrentMonth() {
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const jobs = [];
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = formatDate(new Date(year, month, day));
+            if (loadedDates.has(dateStr)) continue;
+            jobs.push(loadBookingsForDate(dateStr));
+        }
+
+        if (!jobs.length) return;
+        try {
+            await Promise.all(jobs);
+            renderCalendar();
+        } catch (err) {
+            console.error(err);
+            rangeMeta.textContent = '예약 정보를 불러오는 데 실패했습니다.';
+        }
+    }
+
+    async function changeMonth(offset) {
+        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1);
         renderCalendar();
-    });
+        await loadBookingsForCurrentMonth();
+    }
 
     resetTodayBtn.addEventListener('click', () => {
         currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -194,6 +245,7 @@
         selectedEnd = null;
         awaitingEnd = false;
         renderCalendar();
+        void loadBookingsForCurrentMonth();
     });
 
     function getBookingsByDate(dateStr) {
@@ -369,7 +421,7 @@
                 const row = document.createElement('div');
                 row.className = 'booking';
                 const guest = document.createElement('span');
-                guest.textContent = item.guest;
+                guest.textContent = item.nickname;
                 const range = document.createElement('small');
                 range.textContent = `${item.start} ~ ${item.end}`;
                 row.appendChild(guest);
@@ -412,5 +464,68 @@
         }
     });
 
+    async function handleBookingSubmit() {
+        if (!selectedStart || !selectedEnd) {
+            alert('예약할 날짜를 먼저 선택해주세요.');
+            return;
+        }
+        if (isBeforeToday(selectedStart) || isBeforeToday(selectedEnd)) {
+            alert('지난 날짜는 예약할 수 없습니다.');
+            return;
+        }
+
+        const startDate = parseDate(selectedStart);
+        const endDate = parseDate(selectedEnd);
+        const [fromStr, toStr] = startDate <= endDate
+            ? [selectedStart, selectedEnd]
+            : [selectedEnd, selectedStart];
+
+        if (bookBtn) bookBtn.disabled = true;
+        try {
+            const res = await fetch('/api/v1/booking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    from: toEpochSecond(parseDate(fromStr)),
+                    to: toEpochSecond(parseDate(toStr)),
+                }),
+            });
+
+            if (!res.ok) {
+                let message = '예약에 실패했습니다. 잠시 후 다시 시도해주세요.';
+                try {
+                    const errorData = await res.json();
+                    if (errorData.message) {
+                        message = errorData.message;
+                    }
+                } catch (err) {
+                    console.warn('예약 실패 응답 파싱 실패', err);
+                }
+                throw new Error(message);
+            }
+
+            const created = await res.json();
+            storeBooking(created);
+            selectedStart = null;
+            selectedEnd = null;
+            awaitingEnd = false;
+            renderCalendar();
+            alert('예약이 완료되었습니다.');
+        } catch (err) {
+            console.error('예약 생성 실패', err);
+            alert(err.message || '예약 처리 중 문제가 발생했습니다.');
+        } finally {
+            if (bookBtn) bookBtn.disabled = !(selectedStart && selectedEnd);
+        }
+    }
+
+    prevBtn.addEventListener('click', () => { void changeMonth(-1); });
+    nextBtn.addEventListener('click', () => { void changeMonth(1); });
+    if (bookBtn) {
+        bookBtn.addEventListener('click', () => { void handleBookingSubmit(); });
+    }
+
     renderCalendar();
+    void loadBookingsForCurrentMonth();
 })();

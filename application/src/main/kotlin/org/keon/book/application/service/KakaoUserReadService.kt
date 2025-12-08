@@ -13,11 +13,11 @@ class KakaoUserReadService(
 
     override fun invoke(query: KakaoUserReadUseCase.Query): KakaoUserReadUseCase.Response {
         val token = kakaoSessionReadRepository(
-            KakaoSessionReadRepository.Request(accountId = query.accountId,)
+            KakaoSessionReadRepository.Request(accountId = query.accountId)
         )
 
         val user = kakaoUserReadRepository(
-            KakaoUserReadRepository.Request(
+            KakaoUserReadRepository.Request.KakaoToken(
                 accessToken = token.accessToken,
                 refreshToken = token.refreshToken,
             )

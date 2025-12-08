@@ -36,7 +36,6 @@ class BookingController(
                 from = request.from,
                 to = request.to,
                 accountId = accountId,
-                nickname = request.nickname,
             )
         )
 
@@ -66,6 +65,5 @@ class BookingController(
     data class BookingCreateDto(
         val from: EpochSecond,
         val to: EpochSecond,
-        val nickname: String,
     )
 }

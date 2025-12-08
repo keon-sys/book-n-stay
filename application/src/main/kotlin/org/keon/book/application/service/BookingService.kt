@@ -4,10 +4,7 @@ import org.keon.book.application.port.inbound.BookingCreateUseCase
 import org.keon.book.application.port.inbound.BookingDeleteUseCase
 import org.keon.book.application.port.inbound.BookingsReadUseCase
 import org.keon.book.application.port.inbound.MyBookingsReadUseCase
-import org.keon.book.application.port.outbound.BookingCreateRepository
-import org.keon.book.application.port.outbound.BookingDeleteRepository
-import org.keon.book.application.port.outbound.BookingsReadRepository
-import org.keon.book.application.port.outbound.MyBookingsReadRepository
+import org.keon.book.application.port.outbound.*
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,6 +13,7 @@ class BookingService(
     private val myBookingsReadRepository: MyBookingsReadRepository,
     private val bookingCreateRepository: BookingCreateRepository,
     private val bookingDeleteRepository: BookingDeleteRepository,
+    private val kakaoUserReadRepository: KakaoUserReadRepository,
 ) : BookingsReadUseCase, MyBookingsReadUseCase, BookingCreateUseCase, BookingDeleteUseCase {
 
     override fun invoke(query: BookingsReadUseCase.Query): BookingsReadUseCase.Response {
@@ -45,11 +43,16 @@ class BookingService(
     }
 
     override fun invoke(command: BookingCreateUseCase.Command): BookingCreateUseCase.Response {
+        val userInfo = kakaoUserReadRepository(
+            KakaoUserReadRepository.Request.AccountId(command.accountId)
+        )
+        val nickname = userInfo.nickname ?: throw IllegalStateException("User nickname not found")
+
         val result = bookingCreateRepository(BookingCreateRepository.Request(
             from = command.from,
             to = command.to,
             accountId = command.accountId,
-            nickname = command.nickname,
+            nickname = nickname,
         ))
         return BookingCreateUseCase.Response(
             bookingId = result.id,
