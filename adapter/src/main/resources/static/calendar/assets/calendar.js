@@ -44,6 +44,7 @@
     let longPressTriggered = false;
     let awaitingEnd = false;
     let lastHoverDate = null;
+    let suppressClick = false;
 
     function formatDate(date) {
         const y = date.getFullYear();
@@ -263,6 +264,10 @@
     }
 
     function onDayClick(e) {
+        if (suppressClick) {
+            suppressClick = false;
+            return;
+        }
         if (dragging || longPressTriggered) return;
         cancelLongPress();
         handleSingleClick(e.currentTarget.dataset.date);
@@ -307,6 +312,7 @@
         } else if (targetDate) {
             handleSingleClick(targetDate);
         }
+        suppressClick = true;
         dragStartDate = null;
         dragging = false;
         clearSelecting();
