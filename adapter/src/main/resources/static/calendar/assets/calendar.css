@@ -227,6 +227,18 @@ h1 {
     align-items: center;
     gap: 6px;
     justify-content: center;
+    position: relative;
+    width: 32px;
+    height: 32px;
+}
+
+.day-number.saturday { color: #1d4ed8; }
+.day-number.sunday { color: #dc2626; }
+.day-number.today {
+    background: #f87171;
+    color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #fff inset;
 }
 
 .badge {
@@ -238,13 +250,7 @@ h1 {
     color: #fff;
 }
 
-.today-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: inline-block;
-}
+.today-dot { display: none; }
 
 .count-low { background: #e6f4ea; border-color: #c6e6cf; }
 .count-mid { background: #fef3c7; border-color: #fde68a; }

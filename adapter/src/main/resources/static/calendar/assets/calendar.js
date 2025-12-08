@@ -107,11 +107,15 @@
         const dayNumber = document.createElement('div');
         dayNumber.className = 'day-number';
         dayNumber.textContent = dayNum;
+        const weekday = date.getDay();
+        if (weekday === 0) {
+            dayNumber.classList.add('sunday');
+        } else if (weekday === 6) {
+            dayNumber.classList.add('saturday');
+        }
 
         if (isSameDay(date, today)) {
-            const dot = document.createElement('span');
-            dot.className = 'today-dot';
-            dayNumber.appendChild(dot);
+            dayNumber.classList.add('today');
         }
 
         if (selectedStart && selectedEnd && isWithin(date, selectedStart, selectedEnd)) {
