@@ -1,7 +1,7 @@
 package org.keon.book.application.port.outbound
 
 interface KakaoTokenCacheReadRepository {
-    operator fun invoke(request: Request): Result?
+    operator fun invoke(request: Request): Result
 
     data class Request(
         val accountId: String,

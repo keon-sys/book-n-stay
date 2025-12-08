@@ -1,5 +1,6 @@
 package org.keon.book.adapter.outbound.inmemory
 
+import org.keon.book.adapter.exception.KakaoAuthenticationException
 import org.keon.book.application.port.outbound.KakaoTokenCacheDeleteRepository
 import org.keon.book.application.port.outbound.KakaoTokenCacheReadRepository
 import org.keon.book.application.port.outbound.KakaoTokenCacheSaveRepository
@@ -23,15 +24,16 @@ class KakaoTokenCacheInMemory :
         )
     }
 
-    override fun invoke(request: KakaoTokenCacheReadRepository.Request): KakaoTokenCacheReadRepository.Result? {
-        return tokenStore[request.accountId]?.let { entity ->
-            KakaoTokenCacheReadRepository.Result(
-                accessToken = entity.accessToken,
-                refreshToken = entity.refreshToken,
-                expiresIn = entity.expiresIn,
-                refreshTokenExpiresIn = entity.refreshTokenExpiresIn,
-            )
-        }
+    override fun invoke(request: KakaoTokenCacheReadRepository.Request): KakaoTokenCacheReadRepository.Result {
+        val entity = tokenStore[request.accountId]
+            ?: throw KakaoAuthenticationException("Token not found for accountId: ${request.accountId}")
+
+        return KakaoTokenCacheReadRepository.Result(
+            accessToken = entity.accessToken,
+            refreshToken = entity.refreshToken,
+            expiresIn = entity.expiresIn,
+            refreshTokenExpiresIn = entity.refreshTokenExpiresIn,
+        )
     }
 
     override fun invoke(request: KakaoTokenCacheDeleteRepository.Request) {

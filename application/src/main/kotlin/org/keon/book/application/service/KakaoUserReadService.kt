@@ -14,7 +14,7 @@ class KakaoUserReadService(
     override fun invoke(query: KakaoUserReadUseCase.Query): KakaoUserReadUseCase.Response {
         val token = kakaoTokenCacheReadRepository(
             KakaoTokenCacheReadRepository.Request(accountId = query.accountId,)
-        ) ?: throw IllegalStateException("Token not found for accountId: ${query.accountId}")
+        )
 
         val user = kakaoUserReadRepository(
             KakaoUserReadRepository.Request(

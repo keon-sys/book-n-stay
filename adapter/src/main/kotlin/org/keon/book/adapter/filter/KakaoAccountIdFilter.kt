@@ -25,7 +25,15 @@ class KakaoAccountIdFilter(
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.requestURI
         return path.startsWith("/auth/") ||
-            path.startsWith("/api/v1/auth/")
+            path.startsWith("/api/v1/auth/") ||
+            path.startsWith("/component/") ||
+            path.endsWith(".js") ||
+            path.endsWith(".css") ||
+            path.endsWith(".html") ||
+            path.endsWith(".svg") ||
+            path.endsWith(".png") ||
+            path.endsWith(".jpg") ||
+            path.endsWith(".ico")
     }
 
     override fun doFilterInternal(
