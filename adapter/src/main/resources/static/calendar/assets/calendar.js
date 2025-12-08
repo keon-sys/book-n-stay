@@ -37,6 +37,7 @@
     const modalClose = modal.querySelector('#modal-close');
 
     const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     let selectedStart = null;
     let selectedEnd = null;
@@ -58,6 +59,10 @@
     function parseDate(value) {
         const [y, m, d] = value.split('-').map(Number);
         return new Date(y, m - 1, d);
+    }
+
+    function isBeforeToday(dateStr) {
+        return parseDate(dateStr) < todayStart;
     }
 
     function dayDiff(startStr, endStr) {
@@ -133,6 +138,9 @@
             else if (ratio < 0.4) tone = 'low';
             else if (ratio >= 0.4) tone = 'mid';
             dayContainer.classList.add(`count-${tone}`);
+        }
+        if (isBeforeToday(dateStr)) {
+            dayContainer.classList.add('past');
         }
 
         dayContainer.appendChild(dayNumber);
@@ -221,11 +229,18 @@
     function onDayPointerDown(e) {
         e.preventDefault();
         const dateStr = e.currentTarget.dataset.date;
-        dragStartDate = dateStr;
         lastHoverDate = dateStr;
         dragging = false;
         longPressTriggered = false;
         clearSelecting();
+
+        if (isBeforeToday(dateStr)) {
+            dragStartDate = null;
+            startLongPress(dateStr);
+            return;
+        }
+
+        dragStartDate = dateStr;
         e.currentTarget.classList.add('selecting');
         startLongPress(dateStr);
     }
@@ -233,6 +248,7 @@
     function onDayPointerEnter(e) {
         if (!dragStartDate) return;
         const dateStr = e.currentTarget.dataset.date;
+        if (isBeforeToday(dateStr)) return;
         lastHoverDate = dateStr;
         if (dateStr !== dragStartDate) {
             cancelLongPress();
@@ -246,6 +262,7 @@
         const target = e.currentTarget;
         if (!target || !target.dataset) return;
         lastHoverDate = target.dataset.date;
+        if (isBeforeToday(lastHoverDate)) return;
         if (lastHoverDate !== dragStartDate) {
             cancelLongPress();
             dragging = true;
@@ -262,6 +279,7 @@
             suppressClick = false;
             return;
         }
+        if (isBeforeToday(e.currentTarget.dataset.date)) return;
         if (dragging || longPressTriggered) return;
         cancelLongPress();
         handleSingleClick(e.currentTarget.dataset.date);
@@ -270,6 +288,7 @@
     }
 
     function previewSelection(startStr, endStr) {
+        if (isBeforeToday(startStr) || isBeforeToday(endStr)) return;
         clearSelecting();
         const start = parseDate(startStr);
         const end = parseDate(endStr);
@@ -281,6 +300,7 @@
     }
 
     function applyDraggedRange(startStr, endStr) {
+        if (isBeforeToday(startStr) || isBeforeToday(endStr)) return;
         const start = parseDate(startStr);
         const end = parseDate(endStr);
         const [from, to] = start <= end ? [start, end] : [end, start];
@@ -293,6 +313,13 @@
     function finalizePointer(dateStr) {
         cancelLongPress();
         const targetDate = lastHoverDate || dateStr || dragStartDate;
+        if (targetDate && isBeforeToday(targetDate)) {
+            clearSelecting();
+            dragStartDate = null;
+            dragging = false;
+            lastHoverDate = null;
+            return;
+        }
         if (longPressTriggered) {
             dragStartDate = null;
             dragging = false;
@@ -314,6 +341,7 @@
     }
 
     function handleSingleClick(dateStr) {
+        if (isBeforeToday(dateStr)) return;
         if (!awaitingEnd) {
             selectedStart = dateStr;
             selectedEnd = null;
