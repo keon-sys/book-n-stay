@@ -7,8 +7,6 @@ import org.keon.book.application.port.outbound.BookingCreateRepository
 import org.keon.book.application.port.outbound.BookingDeleteRepository
 import org.keon.book.application.port.outbound.BookingsReadRepository
 import org.springframework.stereotype.Service
-import java.time.Instant
-import java.time.ZoneOffset
 
 @Service
 class BookingService(
@@ -21,10 +19,9 @@ class BookingService(
         val result = bookingsReadRepository(BookingsReadRepository.Request(query.date))
         val bookings = result.bookings.map { booking ->
             BookingsReadUseCase.BookingInfo(
-                id = booking.id,
+                bookingId = booking.id,
                 from = booking.from,
                 to = booking.to,
-                accountId = booking.accountId,
                 nickname = booking.nickname,
             )
         }
@@ -39,10 +36,9 @@ class BookingService(
             nickname = command.nickname,
         ))
         return BookingCreateUseCase.Response(
-            id = result.id,
+            bookingId = result.id,
             from = result.from,
             to = result.to,
-            accountId = result.accountId,
             nickname = result.nickname,
         )
     }

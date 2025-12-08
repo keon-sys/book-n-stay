@@ -13,10 +13,9 @@ interface BookingCreateUseCase {
     )
 
     data class Response(
-        val id: Long,
+        val bookingId: Long,
         val from: EpochSecond,
         val to: EpochSecond,
-        val accountId: String,
         val nickname: String,
     )
 }

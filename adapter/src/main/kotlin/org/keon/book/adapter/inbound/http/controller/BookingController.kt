@@ -37,7 +37,7 @@ class BookingController(
         val location = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(response.id)
+            .buildAndExpand(response.bookingId)
             .toUri()
 
         return ResponseEntity.created(location).body(response)
