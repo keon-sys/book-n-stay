@@ -122,22 +122,11 @@
         const bookingsArea = document.createElement('div');
         bookingsArea.className = 'bookings';
 
-        todaysBookings.slice(0, 3).forEach(item => {
-            const booking = document.createElement('div');
-            booking.className = 'booking';
-
-            const guest = document.createElement('span');
-            guest.textContent = item.guest;
-
-            booking.appendChild(guest);
-            bookingsArea.appendChild(booking);
-        });
-
-        if (todaysBookings.length > 3) {
-            const more = document.createElement('div');
-            more.className = 'more';
-            more.textContent = `+${todaysBookings.length - 3}명 더`;
-            bookingsArea.appendChild(more);
+        if (todaysBookings.length > 0) {
+            const summary = document.createElement('div');
+            summary.className = 'count-only';
+            summary.textContent = `+${todaysBookings.length}`;
+            bookingsArea.appendChild(summary);
         }
 
         dayContainer.appendChild(dayNumber);

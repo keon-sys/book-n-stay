@@ -2,24 +2,34 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Book n Stay</title>
     <link rel="icon" type="image/svg+xml" href="/bns.svg">
     <link rel="stylesheet" href="/component/header.css">
     <style>
-        body { font-family: "Noto Sans KR", sans-serif; background: linear-gradient(135deg, #f6f7fb, #eef2ff); margin: 0; color: #1b1b1b; }
-        .page { max-width: 920px; margin: 32px auto; padding: 0 24px; }
-        .hero { margin-top: 28px; background: #fff; border-radius: 16px; box-shadow: 0 10px 28px rgba(0,0,0,0.08); padding: 28px; }
-        h1 { margin: 0 0 12px; font-size: 1.8rem; }
-        p { margin: 0 0 16px; line-height: 1.6; }
-        .actions { display: flex; gap: 12px; margin-top: 12px; }
-        .btn { padding: 12px 16px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; font-size: 15px; transition: transform .08s ease, box-shadow .12s ease; }
+        body { font-family: "Noto Sans KR", sans-serif; background: linear-gradient(135deg, #f6f7fb, #eef2ff); margin: 0; color: #1b1b1b; font-size: 16px; }
+        .page { max-width: 960px; margin: 28px auto 80px; padding: 0 22px; }
+        .hero { margin-top: 24px; background: #fff; border-radius: 16px; box-shadow: 0 10px 28px rgba(0,0,0,0.08); padding: 28px; }
+        h1 { margin: 0 0 12px; font-size: clamp(1.8rem, 4vw, 2.1rem); }
+        p { margin: 0 0 16px; line-height: 1.6; font-size: 1rem; }
+        .actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+        .btn { padding: 14px 18px; border-radius: 12px; border: none; cursor: pointer; font-weight: 800; font-size: 16px; min-height: 48px; transition: transform .08s ease, box-shadow .12s ease; }
         .btn-primary { background: #1f3c88; color: #fff; box-shadow: 0 6px 18px rgba(31,60,136,0.2); }
         .btn-secondary { background: #eef2ff; color: #1f3c88; border: 1px solid #cdd5ff; }
         .btn:hover { transform: translateY(-1px); }
         .sections { margin-top: 24px; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-        .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
-        .card h3 { margin: 0 0 8px; }
-        .card p { margin: 0; color: #4b5563; font-size: 14px; line-height: 1.5; }
+        .card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+        .card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+        .card p { margin: 0; color: #4b5563; font-size: 0.98rem; line-height: 1.55; }
+
+        @media (max-width: 720px) {
+            .page { margin: 18px auto 60px; padding: 0 16px; }
+            .hero { padding: 22px; }
+            .actions { gap: 10px; }
+            .btn { width: 100%; }
+            .sections { grid-template-columns: 1fr; }
+            .card { padding: 16px; }
+        }
     </style>
 </head>
 <body>
