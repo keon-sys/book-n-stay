@@ -3,9 +3,11 @@ package org.keon.book.adapter.inbound.http.controller
 import org.keon.book.application.port.inbound.BookingCreateUseCase
 import org.keon.book.application.port.inbound.BookingDeleteUseCase
 import org.keon.book.application.port.inbound.BookingsReadUseCase
-import org.springframework.format.annotation.DateTimeFormat
+import org.keon.book.application.type.EpochSecond
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.ZonedDateTime
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 @RestController
 class BookingController(
@@ -14,41 +16,48 @@ class BookingController(
     private val bookingDeleteUseCase: BookingDeleteUseCase,
 ) {
 
-    @GetMapping("/api/v1/booking")
+    @GetMapping("/api/v1/bookings")
     fun getBookings(
-        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) date: ZonedDateTime,
+        @RequestParam("date") date: EpochSecond,
     ): BookingsReadUseCase.Response =
         bookingsReadUseCase(BookingsReadUseCase.Query(date = date))
 
-    @PostMapping("/api/v1/booking")
+    @PostMapping("/api/v1/bookings")
     fun setBooking(
         @RequestHeader("X-Kakao-Account-Id") accountId: String,
         @RequestBody request: BookingCreateDto,
-    ): BookingCreateUseCase.Response =
-        bookingCreateUseCase(BookingCreateUseCase.Command(
+    ): ResponseEntity<BookingCreateUseCase.Response> {
+        val response = bookingCreateUseCase(BookingCreateUseCase.Command(
             from = request.from,
             to = request.to,
-            accountId = accountId
+            accountId = accountId,
+            nickname = request.nickname,
         ))
 
-    @DeleteMapping("/api/v1/booking")
+        val location = ServletUriComponentsBuilder
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(response.id)
+            .toUri()
+
+        return ResponseEntity.created(location).body(response)
+    }
+
+    @DeleteMapping("/api/v1/bookings/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeBooking(
         @RequestHeader("X-Kakao-Account-Id") accountId: String,
-        @RequestBody request: BookingDeleteDto,
-    ): BookingDeleteUseCase.Response =
+        @PathVariable id: Long,
+    ) {
         bookingDeleteUseCase(BookingDeleteUseCase.Command(
-            bookingId = request.bookingId,
+            bookingId = id,
             accountId = accountId
         ))
+    }
 
     data class BookingCreateDto(
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        val from: ZonedDateTime,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        val to: ZonedDateTime,
-    )
-
-    data class BookingDeleteDto(
-        val bookingId: Long,
+        val from: EpochSecond,
+        val to: EpochSecond,
+        val nickname: String,
     )
 }

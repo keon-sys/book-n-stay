@@ -7,6 +7,8 @@ import org.keon.book.application.port.outbound.BookingCreateRepository
 import org.keon.book.application.port.outbound.BookingDeleteRepository
 import org.keon.book.application.port.outbound.BookingsReadRepository
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.ZoneOffset
 
 @Service
 class BookingService(
@@ -17,19 +19,31 @@ class BookingService(
 
     override fun invoke(query: BookingsReadUseCase.Query): BookingsReadUseCase.Response {
         val result = bookingsReadRepository(BookingsReadRepository.Request(query.date))
-        return BookingsReadUseCase.Response(result.bookings.map { it.accountId })
+        val bookings = result.bookings.map { booking ->
+            BookingsReadUseCase.BookingInfo(
+                id = booking.id,
+                from = booking.from,
+                to = booking.to,
+                accountId = booking.accountId,
+                nickname = booking.nickname,
+            )
+        }
+        return BookingsReadUseCase.Response(bookings)
     }
 
     override fun invoke(command: BookingCreateUseCase.Command): BookingCreateUseCase.Response {
-        bookingCreateRepository(BookingCreateRepository.Request(
+        val result = bookingCreateRepository(BookingCreateRepository.Request(
             from = command.from,
             to = command.to,
             accountId = command.accountId,
+            nickname = command.nickname,
         ))
         return BookingCreateUseCase.Response(
-            from = command.from,
-            to = command.to,
-            accountId = command.accountId,
+            id = result.id,
+            from = result.from,
+            to = result.to,
+            accountId = result.accountId,
+            nickname = result.nickname,
         )
     }
 
