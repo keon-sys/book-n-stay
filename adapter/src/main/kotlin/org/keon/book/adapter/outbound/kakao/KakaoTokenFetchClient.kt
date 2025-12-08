@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.keon.book.adapter.config.Properties
 import org.keon.book.adapter.exception.KakaoAuthenticationException
-import org.keon.book.application.port.outbound.KakaoTokenReadRepository
+import org.keon.book.application.port.outbound.KakaoTokenFetchRepository
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -13,18 +13,18 @@ import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
 
 @Component
-class KakaoTokenReadClient(
+class KakaoTokenFetchClient(
     builder: RestClient.Builder,
     kakaoAccountIdProperty: Properties.KakaoAccountIdProperty,
     private val securityKakaoProperty: Properties.SecurityKakaoProperty,
-) : KakaoTokenReadRepository {
+) : KakaoTokenFetchRepository {
 
     private val authClient = builder
         .baseUrl(kakaoAccountIdProperty.kakaoAuthBaseUrl)
         .defaultHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
         .build()
 
-    override fun invoke(request: KakaoTokenReadRepository.Request): KakaoTokenReadRepository.Result {
+    override fun invoke(request: KakaoTokenFetchRepository.Request): KakaoTokenFetchRepository.Result {
         if (securityKakaoProperty.restApiKey.isBlank()) {
             throw KakaoAuthenticationException("Kakao REST API key is not configured.")
         }
@@ -55,7 +55,7 @@ class KakaoTokenReadClient(
 
         val accessToken = response?.accessToken
             ?: throw KakaoAuthenticationException("Kakao token response did not contain an access token.")
-        return KakaoTokenReadRepository.Result(
+        return KakaoTokenFetchRepository.Result(
             accessToken = accessToken,
             refreshToken = response.refreshToken,
             expiresIn = response.expiresIn,

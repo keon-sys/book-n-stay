@@ -1,6 +1,6 @@
 package org.keon.book.application.port.outbound
 
-interface KakaoTokenCacheReadRepository {
+interface KakaoSessionReadRepository {
     operator fun invoke(request: Request): Result
 
     data class Request(
