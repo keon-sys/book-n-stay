@@ -1,4 +1,5 @@
 (() => {
+    const MAX_CAPACITY = 8;
     const bookings = [
         { guest: '김민수', start: '2025-12-02', end: '2025-12-04' },
         { guest: '박지현', start: '2025-12-07', end: '2025-12-09' },
@@ -6,6 +7,7 @@
         { guest: '이재훈', start: '2025-12-11', end: '2025-12-14' },
         { guest: '최서윤', start: '2025-12-15', end: '2025-12-18' },
         { guest: '이가영', start: '2025-12-20', end: '2025-12-22' },
+        { guest: '조수영', start: '2025-12-20', end: '2025-12-22' },
         { guest: '강태오', start: '2025-12-22', end: '2025-12-24' },
         { guest: '오하늘', start: '2025-12-27', end: '2025-12-30' },
         { guest: '정윤아', start: '2025-12-30', end: '2025-12-30' }
@@ -119,18 +121,17 @@
         }
 
         const todaysBookings = bookings.filter(b => isWithin(date, b.start, b.end));
-        const bookingsArea = document.createElement('div');
-        bookingsArea.className = 'bookings';
-
-        if (todaysBookings.length > 0) {
-            const summary = document.createElement('div');
-            summary.className = 'count-only';
-            summary.textContent = `+${todaysBookings.length}`;
-            bookingsArea.appendChild(summary);
+        const capped = Math.min(todaysBookings.length, MAX_CAPACITY);
+        if (capped > 0) {
+            const ratio = capped / MAX_CAPACITY;
+            let tone = 'mid';
+            if (capped >= MAX_CAPACITY - 1) tone = 'full';
+            else if (ratio < 0.4) tone = 'low';
+            else if (ratio >= 0.4) tone = 'mid';
+            dayContainer.classList.add(`count-${tone}`);
         }
 
         dayContainer.appendChild(dayNumber);
-        dayContainer.appendChild(bookingsArea);
         return dayContainer;
     }
 
