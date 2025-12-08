@@ -8,7 +8,6 @@ interface KakaoUserReadUseCase {
     )
 
     data class Response(
-        val accountId: String,
         val nickname: String?,
     )
 }

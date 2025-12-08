@@ -10,19 +10,9 @@ class KakaoUserController(
     private val kakaoUserReadUseCase: KakaoUserReadUseCase,
 ) {
 
-    @GetMapping("/api/v1/user/kakao/me")
-    fun getKakaoUser(
+    @GetMapping("/api/v1/users/me")
+    fun getCurrentUser(
         @RequestHeader("X-Kakao-Account-Id") accountId: String,
-    ): KakaoUserResponse {
-        val response = kakaoUserReadUseCase(KakaoUserReadUseCase.Query(accountId))
-        return KakaoUserResponse(
-            accountId = response.accountId,
-            nickname = response.nickname,
-        )
-    }
-
-    data class KakaoUserResponse(
-        val accountId: String,
-        val nickname: String?,
-    )
+    ): KakaoUserReadUseCase.Response =
+        kakaoUserReadUseCase(KakaoUserReadUseCase.Query(accountId))
 }

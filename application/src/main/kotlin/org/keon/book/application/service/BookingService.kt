@@ -3,17 +3,20 @@ package org.keon.book.application.service
 import org.keon.book.application.port.inbound.BookingCreateUseCase
 import org.keon.book.application.port.inbound.BookingDeleteUseCase
 import org.keon.book.application.port.inbound.BookingsReadUseCase
+import org.keon.book.application.port.inbound.MyBookingsReadUseCase
 import org.keon.book.application.port.outbound.BookingCreateRepository
 import org.keon.book.application.port.outbound.BookingDeleteRepository
 import org.keon.book.application.port.outbound.BookingsReadRepository
+import org.keon.book.application.port.outbound.MyBookingsReadRepository
 import org.springframework.stereotype.Service
 
 @Service
 class BookingService(
     private val bookingsReadRepository: BookingsReadRepository,
+    private val myBookingsReadRepository: MyBookingsReadRepository,
     private val bookingCreateRepository: BookingCreateRepository,
     private val bookingDeleteRepository: BookingDeleteRepository,
-) : BookingsReadUseCase, BookingCreateUseCase, BookingDeleteUseCase {
+) : BookingsReadUseCase, MyBookingsReadUseCase, BookingCreateUseCase, BookingDeleteUseCase {
 
     override fun invoke(query: BookingsReadUseCase.Query): BookingsReadUseCase.Response {
         val result = bookingsReadRepository(BookingsReadRepository.Request(query.date))
@@ -26,6 +29,19 @@ class BookingService(
             )
         }
         return BookingsReadUseCase.Response(bookings)
+    }
+
+    override fun invoke(query: MyBookingsReadUseCase.Query): MyBookingsReadUseCase.Response {
+        val result = myBookingsReadRepository(MyBookingsReadRepository.Request(query.accountId))
+        val bookings = result.bookings.map { booking ->
+            MyBookingsReadUseCase.BookingInfo(
+                bookingId = booking.id,
+                from = booking.from,
+                to = booking.to,
+                nickname = booking.nickname,
+            )
+        }
+        return MyBookingsReadUseCase.Response(bookings)
     }
 
     override fun invoke(command: BookingCreateUseCase.Command): BookingCreateUseCase.Response {

@@ -1,10 +1,11 @@
 package org.keon.book.adapter.outbound.h2
 
 import jakarta.persistence.*
-import org.keon.book.application.type.EpochSecond
 import org.keon.book.application.port.outbound.BookingCreateRepository
 import org.keon.book.application.port.outbound.BookingDeleteRepository
 import org.keon.book.application.port.outbound.BookingsReadRepository
+import org.keon.book.application.port.outbound.MyBookingsReadRepository
+import org.keon.book.application.type.EpochSecond
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
@@ -32,13 +33,14 @@ data class BookingEntity(
 @Repository
 interface BookingJpaRepository : JpaRepository<BookingEntity, Long> {
     fun findByFromBetween(start: Long, end: Long): List<BookingEntity>
+    fun findByAccountId(accountId: String): List<BookingEntity>
     fun deleteByIdAndAccountId(id: Long, accountId: String)
 }
 
 @Component
 class BookingH2Repository(
     private val jpaRepository: BookingJpaRepository,
-) : BookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {
+) : BookingsReadRepository, MyBookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {
 
     override fun invoke(request: BookingsReadRepository.Request): BookingsReadRepository.Result {
         // request.date는 특정 날짜의 시작 시각 (00:00:00 UTC)
@@ -74,6 +76,20 @@ class BookingH2Repository(
             accountId = saved.accountId,
             nickname = saved.nickname,
         )
+    }
+
+    override fun invoke(request: MyBookingsReadRepository.Request): MyBookingsReadRepository.Result {
+        val entities = jpaRepository.findByAccountId(request.accountId)
+        val bookings = entities.map { entity ->
+            MyBookingsReadRepository.BookingData(
+                id = entity.id,
+                from = EpochSecond(entity.from),
+                to = EpochSecond(entity.to),
+                accountId = entity.accountId,
+                nickname = entity.nickname,
+            )
+        }
+        return MyBookingsReadRepository.Result(bookings)
     }
 
     override fun invoke(request: BookingDeleteRepository.Request) {

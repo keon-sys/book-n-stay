@@ -24,7 +24,6 @@ class KakaoUserReadService(
         )
 
         return KakaoUserReadUseCase.Response(
-            accountId = user.accountId,
             nickname = user.nickname,
         )
     }
