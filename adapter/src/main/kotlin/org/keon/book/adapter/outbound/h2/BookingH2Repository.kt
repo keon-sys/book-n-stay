@@ -3,7 +3,7 @@ package org.keon.book.adapter.outbound.h2
 import jakarta.persistence.*
 import org.keon.book.application.port.outbound.BookingCreateRepository
 import org.keon.book.application.port.outbound.BookingDeleteRepository
-import org.keon.book.application.port.outbound.BookingReadRepository
+import org.keon.book.application.port.outbound.BookingsReadRepository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
@@ -12,22 +12,22 @@ import java.time.ZonedDateTime
 @Component
 class BookingH2Repository(
     private val jpaRepository: BookingJpaRepository,
-) : BookingReadRepository, BookingCreateRepository, BookingDeleteRepository {
+) : BookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {
 
-    override fun invoke(request: BookingReadRepository.Request): BookingReadRepository.Result {
+    override fun invoke(request: BookingsReadRepository.Request): BookingsReadRepository.Result {
         val startOfDay = request.date.toLocalDate().atStartOfDay(request.date.zone)
         val endOfDay = startOfDay.plusDays(1)
 
         val entities = jpaRepository.findByFromBetween(startOfDay, endOfDay)
         val bookings = entities.map { entity ->
-            BookingReadRepository.BookingData(
+            BookingsReadRepository.BookingData(
                 id = entity.id,
                 from = entity.from,
                 to = entity.to,
                 accountId = entity.accountId,
             )
         }
-        return BookingReadRepository.Result(bookings)
+        return BookingsReadRepository.Result(bookings)
     }
 
     override fun invoke(request: BookingCreateRepository.Request): BookingCreateRepository.Result {
@@ -47,9 +47,8 @@ class BookingH2Repository(
     }
 
     override fun invoke(request: BookingDeleteRepository.Request) {
-        jpaRepository.deleteByFromAndToAndAccountId(
-            from = request.from,
-            to = request.to,
+        jpaRepository.deleteByIdAndAccountId(
+            id = request.bookingId,
             accountId = request.accountId,
         )
     }
@@ -75,5 +74,5 @@ class BookingH2Repository(
 @Repository
 interface BookingJpaRepository : JpaRepository<BookingH2Repository.BookingEntity, Long> {
     fun findByFromBetween(start: ZonedDateTime, end: ZonedDateTime): List<BookingH2Repository.BookingEntity>
-    fun deleteByFromAndToAndAccountId(from: ZonedDateTime, to: ZonedDateTime, accountId: String)
+    fun deleteByIdAndAccountId(id: Long, accountId: String)
 }

@@ -85,11 +85,7 @@
         rangeDisplay.textContent = `${selectedStart} ~ ${selectedEnd}`;
 
         const diff = dayDiff(selectedStart, selectedEnd);
-        if (diff === 0) {
-            rangeMeta.textContent = '당일 예약';
-        } else {
-            rangeMeta.textContent = `${diff}박 · ${diff + 1}일`;
-        }
+        rangeMeta.textContent = `${diff + 1}일`;
     }
 
     function isSameDay(a, b) {

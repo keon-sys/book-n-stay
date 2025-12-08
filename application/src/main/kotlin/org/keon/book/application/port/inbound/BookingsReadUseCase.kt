@@ -2,7 +2,7 @@ package org.keon.book.application.port.inbound
 
 import java.time.ZonedDateTime
 
-interface BookingReadUseCase {
+interface BookingsReadUseCase {
     operator fun invoke(query: Query): Response
 
     data class Query(

@@ -253,7 +253,8 @@ h1 {
     background: #f87171;
     color: #fff;
     border-radius: 50%;
-    box-shadow: 0 0 0 2px #fff inset;
+    width: 24px;
+    height: 24px;
 }
 
 .day.past {

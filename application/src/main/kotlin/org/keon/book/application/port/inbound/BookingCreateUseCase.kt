@@ -6,12 +6,14 @@ interface BookingCreateUseCase {
     operator fun invoke(command: Command): Response
 
     data class Command(
-        val date: ZonedDateTime,
+        val from: ZonedDateTime,
+        val to: ZonedDateTime,
         val accountId: String,
     )
 
     data class Response(
-        val date: ZonedDateTime,
+        val from: ZonedDateTime,
+        val to: ZonedDateTime,
         val accountId: String,
     )
 }
