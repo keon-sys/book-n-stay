@@ -6,6 +6,7 @@ import org.keon.book.application.port.outbound.BookingDeleteRepository
 import org.keon.book.application.port.outbound.BookingsReadRepository
 import org.keon.book.application.port.outbound.MyBookingsReadRepository
 import org.keon.book.application.type.EpochSecond
+import org.springframework.context.annotation.Profile
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
@@ -31,6 +32,7 @@ data class BookingEntity(
 )
 
 @Repository
+@Profile("dev")
 interface BookingJpaRepository : JpaRepository<BookingEntity, Long> {
     fun findByFromBetween(start: Long, end: Long): List<BookingEntity>
     fun findByAccountId(accountId: String): List<BookingEntity>
@@ -38,6 +40,7 @@ interface BookingJpaRepository : JpaRepository<BookingEntity, Long> {
 }
 
 @Component
+@Profile("dev")
 class BookingH2Repository(
     private val jpaRepository: BookingJpaRepository,
 ) : BookingsReadRepository, MyBookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {

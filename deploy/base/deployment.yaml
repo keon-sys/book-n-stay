@@ -20,6 +20,8 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            - name: BOOKING_STORAGE_PATH
+              value: "/var/book-n-stay/data/bookings.json"
           ports:
             - name: http
               containerPort: 8080

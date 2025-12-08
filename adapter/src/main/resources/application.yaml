@@ -29,6 +29,10 @@ spring.config.active.on-profile: prod
 app:
   phase: PROD
 
+booking:
+  storage:
+    path: ${BOOKING_STORAGE_PATH:./data/bookings.json}
+
 logging:
   level:
     root: WARN
