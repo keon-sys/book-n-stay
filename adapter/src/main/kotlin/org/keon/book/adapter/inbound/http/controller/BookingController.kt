@@ -1,5 +1,7 @@
 package org.keon.book.adapter.inbound.http.controller
 
+import org.keon.book.application.exception.BookingCapacityExceededException
+import org.keon.book.application.exception.DuplicateUserBookingException
 import org.keon.book.application.port.inbound.BookingCreateUseCase
 import org.keon.book.application.port.inbound.BookingDeleteUseCase
 import org.keon.book.application.port.inbound.BookingsReadUseCase
@@ -22,9 +24,10 @@ class BookingController(
 
     @GetMapping("/api/v1/bookings")
     fun getBookings(
-        @RequestParam("date") date: EpochSecond,
+        @RequestParam("year") year: Int,
+        @RequestParam("month") month: Int,
     ): BookingsReadUseCase.Response =
-        bookingsReadUseCase(BookingsReadUseCase.Query(date = date))
+        bookingsReadUseCase(BookingsReadUseCase.Query(year = year, month = month))
 
     @PostMapping("/api/v1/booking")
     fun setBooking(
@@ -39,10 +42,11 @@ class BookingController(
             )
         )
 
+        val firstBookingId = response.bookings.firstOrNull()?.bookingId
         val location = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(response.bookingId)
+            .buildAndExpand(firstBookingId)
             .toUri()
 
         return ResponseEntity.created(location).body(response)
@@ -65,5 +69,27 @@ class BookingController(
     data class BookingCreateDto(
         val from: EpochSecond,
         val to: EpochSecond,
+    )
+
+    @ExceptionHandler(DuplicateUserBookingException::class)
+    fun handleDuplicateUserBookingException(e: DuplicateUserBookingException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(ErrorResponse(
+                message = e.message ?: "이미 해당 날짜에 예약이 존재합니다.",
+            ))
+    }
+
+    @ExceptionHandler(BookingCapacityExceededException::class)
+    fun handleBookingCapacityExceededException(e: BookingCapacityExceededException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(ErrorResponse(
+                message = e.message ?: "해당 날짜의 예약 인원이 초과되었습니다.",
+            ))
+    }
+
+    data class ErrorResponse(
+        val message: String,
     )
 }

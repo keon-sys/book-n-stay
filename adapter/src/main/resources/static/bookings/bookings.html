@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>내 예약 목록</title>
+    <link rel="icon" type="image/svg+xml" href="/bns.svg">
+    <link rel="stylesheet" href="/component/header.css">
+    <link rel="stylesheet" href="/bookings/bookings.css">
+</head>
+<body>
+<div class="page">
+    <div class="hero">
+        <div>
+            <p class="eyebrow">나의 예약</p>
+            <h1>예약 내역을 확인하고 취소할 수 있어요</h1>
+            <p class="subtext">로그인한 계정으로 만든 예약만 표시됩니다.</p>
+            <p class="subtext">여러 날짜를 예약하면 각 날짜별 예약이 개별 항목으로 표시됩니다.</p>
+        </div>
+        <div class="hero-actions">
+            <a class="ghost-link" href="/calendar">달력으로 이동</a>
+        </div>
+    </div>
+
+    <section class="list-section">
+        <div class="list-header">
+            <h2>예약 목록</h2>
+            <span id="status-text" class="status-text">불러오는 중...</span>
+        </div>
+        <div id="bookings-list" class="bookings-list" role="list"></div>
+    </section>
+</div>
+
+<script type="module" src="/component/header.js"></script>
+<script src="/bookings/bookings.js"></script>
+</body>
+</html>

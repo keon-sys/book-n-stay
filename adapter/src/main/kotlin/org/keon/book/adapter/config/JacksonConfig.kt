@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import org.keon.book.application.type.EpochSecond
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import kotlin.jvm.java
 
 @Configuration
 class JacksonConfig {

@@ -6,7 +6,8 @@ interface BookingsReadUseCase {
     operator fun invoke(query: Query): Response
 
     data class Query(
-        val date: EpochSecond,
+        val year: Int,
+        val month: Int,
     )
 
     data class Response(
@@ -14,9 +15,7 @@ interface BookingsReadUseCase {
     )
 
     data class BookingInfo(
-        val bookingId: Long?,
-        val from: EpochSecond,
-        val to: EpochSecond,
+        val date: EpochSecond,
         val nickname: String,
     )
 }

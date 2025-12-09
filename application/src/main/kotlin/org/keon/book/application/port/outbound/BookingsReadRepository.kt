@@ -6,7 +6,8 @@ interface BookingsReadRepository {
     operator fun invoke(request: Request): Result
 
     data class Request(
-        val date: EpochSecond,
+        val year: Int,
+        val month: Int,
     )
 
     data class Result(
@@ -15,8 +16,7 @@ interface BookingsReadRepository {
 
     data class BookingData(
         val id: Long?,
-        val from: EpochSecond,
-        val to: EpochSecond,
+        val date: EpochSecond,
         val accountId: String,
         val nickname: String,
     )

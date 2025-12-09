@@ -15,8 +15,7 @@ interface UserBookingsReadRepository {
 
     data class BookingData(
         val id: Long?,
-        val from: EpochSecond,
-        val to: EpochSecond,
+        val date: EpochSecond,
         val accountId: String,
         val nickname: String,
     )

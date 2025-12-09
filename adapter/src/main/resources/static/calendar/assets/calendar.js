@@ -53,8 +53,20 @@
         return new Date(y, m - 1, d);
     }
 
+    function addDays(date, days) {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    }
+
     function toEpochSecond(date) {
         return Math.floor(date.getTime() / 1000);
+    }
+
+    function extractBookingDateEpoch(payload) {
+        const raw = payload.date ?? payload.from ?? payload.start;
+        const epoch = typeof raw === 'string' ? Number(raw) : raw;
+        return Number.isFinite(epoch) ? Number(epoch) : null;
     }
 
     function bookingKey(payload) {
@@ -62,20 +74,22 @@
         if (id != null) {
             return `id:${id}`;
         }
-        return `${payload.from}-${payload.to}-${payload.nickname || ''}`;
+        const datePart = extractBookingDateEpoch(payload);
+        const nickname = payload.nickname || '';
+        return `${datePart ?? 'unknown'}-${nickname}`;
     }
 
     function storeBooking(payload) {
+        const date = extractBookingDateEpoch(payload);
+        if (!Number.isFinite(date)) return;
         const key = bookingKey(payload);
         if (bookingKeys.has(key)) return;
         bookingKeys.add(key);
-        const from = Number(payload.from ?? payload.start);
-        const to = Number(payload.to ?? payload.end ?? payload.start);
         bookings.push({
             id: payload.bookingId ?? payload.id ?? null,
             nickname: payload.nickname ?? '알 수 없음',
-            start: formatDate(new Date(from * 1000)),
-            end: formatDate(new Date(to * 1000)),
+            start: formatDate(new Date(date * 1000)),
+            end: formatDate(new Date(date * 1000)),
         });
     }
 
@@ -199,33 +213,26 @@
         });
     }
 
-    async function loadBookingsForDate(dateStr) {
-        if (loadedDates.has(dateStr)) return;
-        const epoch = toEpochSecond(parseDate(dateStr));
-        const res = await fetch(`/api/v1/bookings?date=${epoch}`, { credentials: 'include' });
+    async function loadBookingsForMonth(year, month) {
+        const monthKey = `${year}-${month}`;
+        if (loadedDates.has(monthKey)) return;
+
+        const res = await fetch(`/api/v1/bookings?year=${year}&month=${month}`, { credentials: 'include' });
         if (!res.ok) {
             throw new Error(`예약을 불러오지 못했습니다. (${res.status})`);
         }
         const data = await res.json();
         const list = Array.isArray(data.bookings) ? data.bookings : [];
         list.forEach(storeBooking);
-        loadedDates.add(dateStr);
+        loadedDates.add(monthKey);
     }
 
     async function loadBookingsForCurrentMonth() {
         const year = currentMonth.getFullYear();
-        const month = currentMonth.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const jobs = [];
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = formatDate(new Date(year, month, day));
-            if (loadedDates.has(dateStr)) continue;
-            jobs.push(loadBookingsForDate(dateStr));
-        }
+        const month = currentMonth.getMonth() + 1; // Backend expects 1-indexed month
 
-        if (!jobs.length) return;
         try {
-            await Promise.all(jobs);
+            await loadBookingsForMonth(year, month);
             renderCalendar();
         } catch (err) {
             console.error(err);
@@ -476,9 +483,12 @@
 
         const startDate = parseDate(selectedStart);
         const endDate = parseDate(selectedEnd);
-        const [fromStr, toStr] = startDate <= endDate
-            ? [selectedStart, selectedEnd]
-            : [selectedEnd, selectedStart];
+        const [fromDate, toDate] = startDate <= endDate
+            ? [startDate, endDate]
+            : [endDate, startDate];
+
+        // Backend expects checkout day exclusive, so send the next day for "to"
+        const checkoutDate = addDays(toDate, 1);
 
         if (bookBtn) bookBtn.disabled = true;
         try {
@@ -487,8 +497,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
-                    from: toEpochSecond(parseDate(fromStr)),
-                    to: toEpochSecond(parseDate(toStr)),
+                    from: toEpochSecond(fromDate),
+                    to: toEpochSecond(checkoutDate),
                 }),
             });
 
@@ -506,7 +516,9 @@
             }
 
             const created = await res.json();
-            storeBooking(created);
+            // Response now contains array of bookings
+            const list = Array.isArray(created.bookings) ? created.bookings : [];
+            list.forEach(storeBooking);
             selectedStart = null;
             selectedEnd = null;
             awaitingEnd = false;

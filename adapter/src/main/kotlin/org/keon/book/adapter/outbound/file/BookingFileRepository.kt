@@ -18,8 +18,7 @@ import kotlin.concurrent.write
 
 data class BookingFileEntity(
     val id: Long,
-    val from: Long,
-    val to: Long,
+    val date: Long,
     val accountId: String,
     val nickname: String,
 )
@@ -41,7 +40,6 @@ class BookingFileRepository(
         if (!storageFile.exists()) {
             storageFile.writeText("[]")
         } else {
-            // 기존 파일에서 최대 ID를 찾아 idGenerator 초기화
             val bookings = readBookings()
             val maxId = bookings.maxOfOrNull { it.id } ?: 0L
             idGenerator.set(maxId)
@@ -61,17 +59,21 @@ class BookingFileRepository(
     }
 
     override fun invoke(request: BookingsReadRepository.Request): BookingsReadRepository.Result {
-        val startOfDay = request.date.value
-        val endOfDay = (request.date + 86400).value
+        val startOfMonth = java.time.LocalDate.of(request.year, request.month, 1)
+            .atStartOfDay(java.time.ZoneId.of("Asia/Seoul"))
+            .toEpochSecond()
+        val endOfMonth = java.time.LocalDate.of(request.year, request.month, 1)
+            .plusMonths(1)
+            .atStartOfDay(java.time.ZoneId.of("Asia/Seoul"))
+            .toEpochSecond()
 
         val bookings = lock.read {
             readBookings()
-                .filter { it.from >= startOfDay && it.from < endOfDay }
+                .filter { it.date >= startOfMonth && it.date < endOfMonth }
                 .map { entity ->
                     BookingsReadRepository.BookingData(
                         id = entity.id,
-                        from = EpochSecond(entity.from),
-                        to = EpochSecond(entity.to),
+                        date = EpochSecond(entity.date),
                         accountId = entity.accountId,
                         nickname = entity.nickname,
                     )
@@ -87,8 +89,7 @@ class BookingFileRepository(
             val newId = idGenerator.incrementAndGet()
             val newEntity = BookingFileEntity(
                 id = newId,
-                from = request.from.value,
-                to = request.to.value,
+                date = request.date.value,
                 accountId = request.accountId,
                 nickname = request.nickname,
             )
@@ -97,8 +98,7 @@ class BookingFileRepository(
 
             BookingCreateRepository.Result(
                 id = newEntity.id,
-                from = EpochSecond(newEntity.from),
-                to = EpochSecond(newEntity.to),
+                date = EpochSecond(newEntity.date),
                 accountId = newEntity.accountId,
                 nickname = newEntity.nickname,
             )
@@ -112,8 +112,7 @@ class BookingFileRepository(
                 .map { entity ->
                     UserBookingsReadRepository.BookingData(
                         id = entity.id,
-                        from = EpochSecond(entity.from),
-                        to = EpochSecond(entity.to),
+                        date = EpochSecond(entity.date),
                         accountId = entity.accountId,
                         nickname = entity.nickname,
                     )
