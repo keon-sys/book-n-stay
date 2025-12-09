@@ -5,6 +5,7 @@ metadata:
   namespace: book-n-stay
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    cert-manager.io/cluster-issuer: letsencrypt-staging
 spec:
   ingressClassName: traefik
   tls:
