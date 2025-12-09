@@ -39,6 +39,7 @@
         <p>예약 달력을 확인하고 관리하세요. 로그인이 필요하면 자동으로 안내됩니다.</p>
         <div class="actions">
             <button class="btn btn-primary" onclick="goCalendar()">예약 달력 보기</button>
+            <button class="btn btn-secondary" onclick="goBookings()">예약 목록 보기</button>
         </div>
     </div>
     <div class="sections">
@@ -60,6 +61,9 @@
 <script>
     function goCalendar() {
         window.location.href = '/calendar';
+    }
+    function goBookings() {
+        window.location.href = '/bookings';
     }
 </script>
 </body>
