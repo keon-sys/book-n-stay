@@ -26,7 +26,7 @@ data class BookingFileEntity(
 @Component
 @Profile("prod")
 class BookingFileRepository(
-    @Value("\${booking.storage.path:./data/bookings.json}")
+    @Value("\${storage.booking.path}")
     private val storagePath: String,
     private val objectMapper: ObjectMapper,
 ) : BookingsReadRepository, UserBookingsReadRepository, BookingCreateRepository, BookingDeleteRepository {

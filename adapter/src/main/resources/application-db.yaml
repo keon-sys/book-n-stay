@@ -1,3 +1,5 @@
+spring.config.active.on-profile: dev
+
 spring:
   datasource:
     url: jdbc:h2:mem:book;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
@@ -7,3 +9,11 @@ spring:
   h2:
     console:
       enabled: true
+
+
+---
+spring.config.active.on-profile: prod
+
+storage:
+  booking:
+    path: ${BOOKING_STORAGE_PATH:./data/bookings.json}

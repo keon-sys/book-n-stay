@@ -51,6 +51,7 @@ class BookingService(
 
         val bookings = result.bookings
             .filter { it.date.value >= todayStart }
+            .sortedBy { it.date.value }
             .map { booking ->
                 UserBookingsReadUseCase.BookingInfo(
                     bookingId = booking.id,

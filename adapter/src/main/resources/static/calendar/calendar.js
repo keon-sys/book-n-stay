@@ -110,9 +110,9 @@
         }
 
         if (selectedStart && !selectedEnd) {
-            rangeDisplay.textContent = `${selectedStart} ~ ?`;
-            rangeMeta.textContent = '종료일을 선택하세요';
-            if (bookBtn) bookBtn.disabled = true;
+            rangeDisplay.textContent = `${selectedStart} ~ ${selectedStart}`;
+            rangeMeta.textContent = '한 날짜만 선택 시 같은 날로 예약됩니다.';
+            if (bookBtn) bookBtn.disabled = false;
             return;
         }
 
@@ -261,6 +261,14 @@
 
     function clearSelecting() {
         calendarGrid.querySelectorAll('.selecting').forEach(el => el.classList.remove('selecting'));
+    }
+
+    function resetSelectionState() {
+        selectedStart = null;
+        selectedEnd = null;
+        awaitingEnd = false;
+        renderCalendar();
+        if (bookBtn) bookBtn.disabled = true;
     }
 
     function startLongPress(dateStr) {
@@ -472,12 +480,20 @@
     });
 
     async function handleBookingSubmit() {
+        if (selectedStart && !selectedEnd) {
+            selectedEnd = selectedStart;
+            awaitingEnd = false;
+            renderCalendar();
+        }
+
         if (!selectedStart || !selectedEnd) {
             alert('예약할 날짜를 먼저 선택해주세요.');
+            resetSelectionState();
             return;
         }
         if (isBeforeToday(selectedStart) || isBeforeToday(selectedEnd)) {
             alert('지난 날짜는 예약할 수 없습니다.');
+            resetSelectionState();
             return;
         }
 
@@ -519,16 +535,12 @@
             // Response now contains array of bookings
             const list = Array.isArray(created.bookings) ? created.bookings : [];
             list.forEach(storeBooking);
-            selectedStart = null;
-            selectedEnd = null;
-            awaitingEnd = false;
-            renderCalendar();
             alert('예약이 완료되었습니다.');
         } catch (err) {
             console.error('예약 생성 실패', err);
             alert(err.message || '예약 처리 중 문제가 발생했습니다.');
         } finally {
-            if (bookBtn) bookBtn.disabled = !(selectedStart && selectedEnd);
+            resetSelectionState();
         }
     }
 
