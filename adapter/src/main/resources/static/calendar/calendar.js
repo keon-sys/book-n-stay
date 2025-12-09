@@ -111,7 +111,7 @@
 
         if (selectedStart && !selectedEnd) {
             rangeDisplay.textContent = `${selectedStart} ~ ${selectedStart}`;
-            rangeMeta.textContent = '한 날짜만 선택 시 같은 날로 예약됩니다.';
+            rangeMeta.textContent = '종료일을 선택하세요';
             if (bookBtn) bookBtn.disabled = false;
             return;
         }

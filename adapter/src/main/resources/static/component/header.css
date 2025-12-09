@@ -14,7 +14,8 @@ body {
 }
 
 .header-brand {
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 800;
     letter-spacing: 0.5px;
     color: #fff;
     text-decoration: none;
@@ -23,6 +24,8 @@ body {
 .header-actions {
     display: flex;
     gap: 10px;
+    min-height: 44px;
+    align-items: center;
 }
 
 .header-button {
@@ -52,13 +55,13 @@ body {
 
 @media (max-width: 720px) {
     .header-bar {
-        padding: 14px 16px;
+        padding: 12px 20px;
         gap: 10px;
         flex-wrap: wrap;
     }
 
     .header-brand {
-        font-size: 1.05rem;
+        font-size: 18px;
     }
 
     .header-actions {
