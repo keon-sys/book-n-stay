@@ -5,7 +5,7 @@ spring:
     import: optional:classpath:/custom/
   profiles:
     include: db, security
-    active: prod
+    active: dev
   threads:
     virtual:
       enabled: true
