@@ -16,7 +16,7 @@ spec:
       containers:
         - name: app
           image: book-n-stay:prod
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           envFrom:
             - secretRef:
                 name: book-n-stay-auth
