@@ -172,4 +172,5 @@ AGENTS.md
 CLAUDE.md
 .claude/
 adapter/src/main/resources/custom/
-.data
+data/
+personal/
