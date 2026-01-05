@@ -17,3 +17,5 @@ spring.config.active.on-profile: prod
 storage:
   booking:
     path: ${BOOKING_STORAGE_PATH:./data/bookings.json}
+  grant:
+    path: ${GRANT_STORAGE_PATH:./data/grant.json}

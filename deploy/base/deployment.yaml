@@ -25,6 +25,8 @@ spec:
               value: "prod"
             - name: BOOKING_STORAGE_PATH
               value: "/var/book-n-stay/data/bookings.json"
+            - name: GRANT_STORAGE_PATH
+              value: "/var/book-n-stay/data/grant.json"
 
           ports:
             - name: http
