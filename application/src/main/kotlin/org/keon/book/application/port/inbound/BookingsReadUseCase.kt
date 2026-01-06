@@ -8,7 +8,7 @@ interface BookingsReadUseCase {
     data class Query(
         val year: Int,
         val month: Int,
-        val accountId: String? = null,
+        val accountId: String,
     )
 
     data class Response(

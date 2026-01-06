@@ -26,7 +26,7 @@ class BookingController(
     fun getBookings(
         @RequestParam("year") year: Int,
         @RequestParam("month") month: Int,
-        @RequestHeader(value = HEADER_ACCOUNT_ID, required = false) accountId: String? = null,
+        @RequestHeader(value = HEADER_ACCOUNT_ID, required = false) accountId: String,
     ): BookingsReadUseCase.Response =
         bookingsReadUseCase(BookingsReadUseCase.Query(year = year, month = month, accountId = accountId))
 
