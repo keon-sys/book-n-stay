@@ -10,6 +10,7 @@
             month: 'short',
             day: 'numeric',
             weekday: 'short',
+            timeZone: 'Asia/Seoul',
         });
     }
 

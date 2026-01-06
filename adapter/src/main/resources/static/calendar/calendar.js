@@ -4,6 +4,14 @@
     const bookingKeys = new Set();
     const loadedDates = new Set();
 
+    const SEOUL_TIMEZONE = 'Asia/Seoul';
+    const seoulDateFormatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: SEOUL_TIMEZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+
     const monthLabel = document.getElementById('month-label');
     const rangeDisplay = document.getElementById('range-display');
     const rangeMeta = document.getElementById('range-meta');
@@ -28,8 +36,9 @@
     const modalBody = modal.querySelector('#modal-body');
     const modalClose = modal.querySelector('#modal-close');
 
-    const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayLabel = formatDate(new Date());
+    const today = parseDate(todayLabel);
+    const todayStart = today;
     let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     let selectedStart = null;
     let selectedEnd = null;
@@ -42,10 +51,7 @@
     let suppressClick = false;
 
     function formatDate(date) {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
+        return seoulDateFormatter.format(date);
     }
 
     function parseDate(value) {
@@ -60,7 +66,8 @@
     }
 
     function toEpochSecond(date) {
-        return Math.floor(date.getTime() / 1000);
+        const dateStr = formatDate(date);
+        return Math.floor(Date.parse(`${dateStr}T00:00:00+09:00`) / 1000);
     }
 
     function extractBookingDateEpoch(payload) {
