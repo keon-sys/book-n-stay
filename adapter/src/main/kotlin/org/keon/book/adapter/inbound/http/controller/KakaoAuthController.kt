@@ -3,8 +3,7 @@ package org.keon.book.adapter.inbound.http.controller
 import jakarta.servlet.http.HttpServletResponse
 import org.keon.book.adapter.auth.JwtAuthTokenService
 import org.keon.book.adapter.config.Properties
-import org.keon.book.application.port.inbound.KakaoAccessTokenReadUseCase
-import org.keon.book.application.port.inbound.KakaoSessionCreateUseCase
+import org.keon.book.application.port.inbound.KakaoLoginUseCase
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
@@ -18,8 +17,7 @@ import java.nio.charset.StandardCharsets
 
 @RestController
 class KakaoAuthController(
-    private val kakaoAccessTokenReadUseCase: KakaoAccessTokenReadUseCase,
-    private val kakaoSessionCreateUseCase: KakaoSessionCreateUseCase,
+    private val kakaoLoginUseCase: KakaoLoginUseCase,
     private val tokenService: JwtAuthTokenService,
     private val securityAuthProperty: Properties.SecurityAuthProperty,
     private val securityKakaoProperty: Properties.SecurityKakaoProperty,
@@ -49,10 +47,8 @@ class KakaoAuthController(
         // 2. Get user info from Kakao API using access token
         // 3. Create JWT session token and set httpOnly cookie
         // 4. Redirect to original page (from state parameter)
-        val jwt = KakaoAccessTokenReadUseCase.Query(authorizationCode, securityKakaoProperty.redirectUri)
-            .run(kakaoAccessTokenReadUseCase::invoke)
-            .let { KakaoSessionCreateUseCase.Command(it.accessToken) }
-            .run(kakaoSessionCreateUseCase::invoke)
+        val jwt = KakaoLoginUseCase.Command(authorizationCode, securityKakaoProperty.redirectUri)
+            .run(kakaoLoginUseCase::invoke)
             .let { tokenService.createToken(it.accountId) }
 
         response.addHeader("Set-Cookie", buildCookie(jwt).toString())

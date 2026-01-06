@@ -3,7 +3,7 @@ package org.keon.book.adapter.outbound.kakao
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.keon.book.adapter.config.Properties
-import org.keon.book.adapter.exception.KakaoAuthenticationException
+import org.keon.book.application.exception.KakaoAuthenticationException
 import org.keon.book.application.port.outbound.KakaoTokenRefreshRepository
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType

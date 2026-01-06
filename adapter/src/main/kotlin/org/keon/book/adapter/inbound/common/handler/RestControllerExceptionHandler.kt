@@ -1,6 +1,6 @@
 package org.keon.book.adapter.inbound.common.handler
 
-import org.keon.book.adapter.exception.KakaoAuthenticationException
+import org.keon.book.application.exception.KakaoAuthenticationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler

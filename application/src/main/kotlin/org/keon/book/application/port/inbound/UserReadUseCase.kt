@@ -1,6 +1,6 @@
 package org.keon.book.application.port.inbound
 
-interface KakaoUserReadUseCase {
+interface UserReadUseCase {
     operator fun invoke(query: Query): Response
 
     data class Query(
@@ -8,6 +8,7 @@ interface KakaoUserReadUseCase {
     )
 
     data class Response(
-        val nickname: String?,
+        val nickname: String,
+        val grantLevel: Int,
     )
 }

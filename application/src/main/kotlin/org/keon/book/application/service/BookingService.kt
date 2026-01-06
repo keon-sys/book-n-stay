@@ -3,11 +3,11 @@ package org.keon.book.application.service
 import org.keon.book.application.exception.BookingCapacityExceededException
 import org.keon.book.application.exception.DuplicateUserBookingException
 import org.keon.book.application.exception.PastBookingDeletionException
-import org.keon.book.application.port.inbound.BookingCreateUseCase
-import org.keon.book.application.port.inbound.BookingDeleteUseCase
-import org.keon.book.application.port.inbound.BookingsReadUseCase
-import org.keon.book.application.port.inbound.UserBookingsReadUseCase
-import org.keon.book.application.port.outbound.*
+import org.keon.book.application.port.inbound.*
+import org.keon.book.application.port.outbound.BookingCreateRepository
+import org.keon.book.application.port.outbound.BookingDeleteRepository
+import org.keon.book.application.port.outbound.BookingsReadRepository
+import org.keon.book.application.port.outbound.UserBookingsReadRepository
 import org.keon.book.application.type.EpochSecond
 import org.springframework.stereotype.Service
 import java.time.ZoneId
@@ -15,11 +15,11 @@ import java.time.temporal.ChronoUnit
 
 @Service
 class BookingService(
+    private val userReadUseCase: UserReadUseCase,
     private val bookingsReadRepository: BookingsReadRepository,
     private val userBookingsReadRepository: UserBookingsReadRepository,
     private val bookingCreateRepository: BookingCreateRepository,
     private val bookingDeleteRepository: BookingDeleteRepository,
-    private val kakaoUserReadRepository: KakaoUserReadRepository,
 ) : BookingsReadUseCase, UserBookingsReadUseCase, BookingCreateUseCase, BookingDeleteUseCase {
 
     companion object {
@@ -65,12 +65,7 @@ class BookingService(
 
     override fun invoke(command: BookingCreateUseCase.Command): BookingCreateUseCase.Response {
         val dates = splitIntoDates(command.from, command.to)
-
-        val userInfo = kakaoUserReadRepository(
-            KakaoUserReadRepository.Request.AccountId(command.accountId)
-        )
-        val nickname = userInfo.nickname ?: throw IllegalStateException("User nickname not found")
-
+        val nickname = userReadUseCase(UserReadUseCase.Query(command.accountId)).nickname
         val datesByMonth = dates.groupBy { date ->
             val dateTime = date.toZonedDateTime().withZoneSameInstant(SEOUL_ZONE)
             dateTime.year to dateTime.monthValue

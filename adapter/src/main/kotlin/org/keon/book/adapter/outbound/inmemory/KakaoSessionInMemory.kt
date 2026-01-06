@@ -1,6 +1,6 @@
 package org.keon.book.adapter.outbound.inmemory
 
-import org.keon.book.adapter.exception.KakaoAuthenticationException
+import org.keon.book.application.exception.KakaoAuthenticationException
 import org.keon.book.application.port.outbound.KakaoSessionDeleteRepository
 import org.keon.book.application.port.outbound.KakaoSessionReadRepository
 import org.keon.book.application.port.outbound.KakaoSessionSaveRepository

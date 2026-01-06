@@ -6,8 +6,7 @@ import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
 import org.keon.book.adapter.auth.JwtAuthTokenService
 import org.keon.book.adapter.config.Properties
-import org.keon.book.adapter.exception.KakaoAuthenticationException
-import org.keon.book.application.port.inbound.KakaoSessionCreateUseCase
+import org.keon.book.application.exception.KakaoAuthenticationException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -17,7 +16,6 @@ import java.util.*
 
 @Component
 class KakaoAccountIdFilter(
-    private val kakaoSessionCreateUseCase: KakaoSessionCreateUseCase,
     private val tokenService: JwtAuthTokenService,
     private val securityAuthProperty: Properties.SecurityAuthProperty,
 ) : OncePerRequestFilter() {
@@ -47,10 +45,7 @@ class KakaoAccountIdFilter(
                 val accountId = handleCookieToken(cookie)
                 filterChain.doFilter(KakaoAccountHeaderRequestWrapper(request, accountId), response)
             } else {
-                val accessToken = bearerToken(request)
-                    ?: return handleMissingAuth(request, response)
-                val accountId = handleAccessToken(accessToken)
-                filterChain.doFilter(KakaoAccountHeaderRequestWrapper(request, accountId), response)
+                return handleMissingAuth(request, response)
             }
         } catch (ex: KakaoAuthenticationException) {
             unauthorized(request, response, ex.message ?: "Unauthorized")
@@ -60,12 +55,6 @@ class KakaoAccountIdFilter(
     private fun handleCookieToken(token: String): String {
         val accountId = tokenService.parseAccountId(token)
         return accountId
-    }
-
-    private fun handleAccessToken(accessToken: String): String {
-        val session = KakaoSessionCreateUseCase.Command(accessToken)
-            .run { kakaoSessionCreateUseCase(this) }
-        return session.accountId
     }
 
     private fun cookieToken(request: HttpServletRequest): String? =
