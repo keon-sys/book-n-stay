@@ -16,6 +16,7 @@ interface BookingsReadUseCase {
     )
 
     data class BookingInfo(
+        val id: Long,
         val date: EpochSecond,
         val nickname: String,
     )

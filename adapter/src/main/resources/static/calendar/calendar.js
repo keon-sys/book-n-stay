@@ -77,23 +77,18 @@
     }
 
     function bookingKey(payload) {
-        const id = payload.bookingId ?? payload.id;
-        if (id != null) {
-            return `id:${id}`;
-        }
-        const datePart = extractBookingDateEpoch(payload);
-        const nickname = payload.nickname || '';
-        return `${datePart ?? 'unknown'}-${nickname}`;
+        const id = payload.id;
+        return id != null ? `id:${id}` : null;
     }
 
     function storeBooking(payload) {
         const date = extractBookingDateEpoch(payload);
         if (!Number.isFinite(date)) return;
         const key = bookingKey(payload);
-        if (bookingKeys.has(key)) return;
-        bookingKeys.add(key);
+        if (key && bookingKeys.has(key)) return;
+        if (key) bookingKeys.add(key);
         bookings.push({
-            id: payload.bookingId ?? payload.id ?? null,
+            id: payload.id ?? payload.bookingId ?? null,
             nickname: payload.nickname ?? '알 수 없음',
             start: formatDate(new Date(date * 1000)),
             end: formatDate(new Date(date * 1000)),
@@ -445,7 +440,9 @@
                 const guest = document.createElement('span');
                 guest.textContent = item.nickname;
                 const range = document.createElement('small');
-                range.textContent = `${item.start} ~ ${item.end}`;
+                range.textContent = item.start === item.end
+                    ? item.start
+                    : `${item.start} ~ ${item.end}`;
                 row.appendChild(guest);
                 row.appendChild(range);
                 modalBody.appendChild(row);

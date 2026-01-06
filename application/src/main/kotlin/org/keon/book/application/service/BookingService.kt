@@ -35,6 +35,7 @@ class BookingService(
         val grantLevel = userReadUseCase(UserReadUseCase.Query(query.accountId)).grantLevel
         val bookings = result.bookings.map { booking ->
             BookingsReadUseCase.BookingInfo(
+                id = booking.id!!,
                 date = booking.date,
                 nickname = if (grantLevel > 1 || booking.accountId == query.accountId) booking.nickname else "***",
             )
